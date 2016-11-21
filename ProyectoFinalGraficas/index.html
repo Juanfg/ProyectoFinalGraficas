@@ -1,0 +1,674 @@
+<? Estefania Morales Abud       A01327969
+ Juan Pablo Flores Galindo      A01328617 ?>
+
+<html> 
+    <head> 
+        <title> Defining a 3D Shape </title> 
+        <style> 
+            canvas { width: 100%; height: 100% }
+        </style> 
+    </head> 
+    <body> 
+        <script src="js/three.js"> </script>
+        <script src="js/loaders/DDSLoader.js"></script>
+        <script src="js/loaders/MTLLoader.js"></script>
+        <script src="js/loaders/OBJLoader.js"></script>
+        <script>
+
+            window.addEventListener('keydown',doKeyDown,true);
+            // agregamos el "listener" para "escuchar" los eventos del teclado
+            
+            var gcaballitos = new THREE.Object3D();
+            var gcaballitos1 = new THREE.Object3D();
+            var gcaballitos2 = new THREE.Object3D();
+            var gcaballitos3 = new THREE.Object3D();
+            var gcaballitosContainer = new THREE.Object3D();
+
+            var cam_zpos = 50.0;
+            var angle = 0;
+
+            function doKeyDown(evt){
+                switch (evt.keyCode) {
+          			case 38:  /* Up arrow pressed */    
+                        camera.position.x -= Math.sin(camera.rotation.y)*5;
+                        camera.position.z -= Math.cos(camera.rotation.y)*5;
+                        break;
+                    case 40:  /* Down arrow pressed */
+                        camera.position.x += Math.sin(camera.rotation.y)*5;
+                        camera.position.z += Math.cos(camera.rotation.y)*5;
+                        break;
+                    case 37:  /* Left arrow pressed */                   
+                        camera.rotation.y += (5 * Math.PI / 180  );
+                        angle+=5;
+                        break;
+                    case 39:  /* Right arrow pressed */
+                        camera.rotation.y -= (5 * Math.PI / 180  );
+                        angle-=5;
+                        break;
+                    case 87:  //W
+                        camera.position.y+=5;
+                        break;
+                    case 65:  //A                      
+                    	angle+=90;
+						camera.position.z -= (5*Math.cos( (angle*(Math.PI/180))  ));
+                        camera.position.x -= (5*Math.sin( (angle*(Math.PI/180) ) ));
+                        angle-=90;
+                        break;
+                    case 83:  //S      
+                        camera.position.y-=5;
+                        break;
+                    case 68:  //D  
+						angle-=90;
+						camera.position.z -= (5*Math.cos( (angle*(Math.PI/180))  ));
+                        camera.position.x -= (5*Math.sin( (angle*(Math.PI/180))  ));
+                        angle+=90;
+                        break;
+                }
+            }
+
+
+            // three basic components of a scene
+            var scene = new THREE.Scene(); 
+            var camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.01, 1000); 
+            var renderer = new THREE.WebGLRenderer(); 
+
+            var loader = new THREE.TextureLoader();
+            loader.crossOrigin = '';
+
+            var materialPisoInterior;
+            var materialPisoExterior;
+            var materialTubo;
+
+            var texturasArray = [
+                                {name: 'texturaPiso', url: 'pisoMadera.jpg'},
+                                {name: 'texturaPisoExt', url: 'pisoVintage.jpg'},
+                                {name: 'texturaTubo', url: 'tuboTextura.jpg'},
+                                {name: 'texturaTubo', url: 'espejoCentro.jpg'}
+                                ];
+            
+            cargarTexturas();
+
+            function cargarTexturas ( callback ){
+                var promiseArray = [],
+                    path = 'img/';
+
+                texturasArray.forEach( function ( fileOBJ ){
+                   promiseArray.push ( new Promise( function ( resolve , reject ){
+                        loader.load(
+                            path+fileOBJ.url,
+
+                            function ( texture ){
+                                resolve (texture);
+                            },
+
+                            function ( xhr ){
+                                console.log( ( xhr.loaded / xhr.total * 100 ) + '% cargada' );
+                            },
+
+                            function ( xhr ){
+                                reject( new Error ( xhr + 'Se produjo un error tratando de cargar ' + fileOBJ.url ) )
+                            }
+                        ) 
+                    }));
+                })
+
+                Promise.all( promiseArray )
+                .then(
+
+                    function ( texturas ) {
+                        materialPisoInterior = new THREE.MeshBasicMaterial({map: texturas[0]});   
+                        materialPisoExterior = new THREE.MeshBasicMaterial({map: texturas[1]}); 
+                        materialTubo = new THREE.MeshBasicMaterial({map: texturas[2]});
+                        materialCentro = new THREE.MeshBasicMaterial({map: texturas[3]});                  
+                        pintarCarrusel();                    
+                    },
+                
+                    function ( error ) {
+                        callback( error )
+                })
+            }
+
+            function generarDisco(radio, tubo, material, x, y, z)
+            {
+                var geometry = new THREE.TorusGeometry(radio, tubo, 30, 200);
+                var tubo = new THREE.Mesh( geometry, material );
+                tubo.position.set(x, y, z);
+                return tubo;
+            }
+
+            function generarPatas(radio, altura, angulox, anguloz, x, y, z)
+            {
+                var material = new THREE.MeshPhongMaterial( { color: 0x9e9e9e } );
+                alturaPata = altura/(Math.cos(anguloz*Math.PI/180));
+                var geometry = new THREE.CylinderGeometry(radio, radio, alturaPata);
+                var pata = new THREE.Mesh( geometry, materialTubo );
+                var f1 = new THREE.Object3D();
+                f1.add(pata);
+                pata.position.set(x, y, z);
+                f1.rotation.x += angulox * (Math.PI/180);
+                f1.rotation.z += anguloz * (Math.PI/180);
+                return f1;
+            }
+
+            var canastas = [];
+            function hacerRueda()
+            {
+                //Discos mas grandes
+                var rueda = new THREE.Object3D();
+
+                var material = new THREE.MeshPhongMaterial( { color: 0x9e9e9e } );
+                var discoSuperior = generarDisco(10, .1, materialTubo, 0, 0, -1.3);
+                var discoInferior = generarDisco(10, .1, materialTubo, 0, 0, 1.3);
+                rueda.add(discoSuperior);
+                rueda.add(discoInferior);
+                
+                //Canastas
+                var angulo = 0, aumentoDelAngulo = 22.5;
+                for(var i = 0; i < 16; i++)
+                {
+                    canastas[i] = canasta.clone();  
+                    (canastas[i]).position.set(0, 10 , 0);
+                    var x, y;
+                    x = Math.sin(angulo*(Math.PI/180))*(10);
+                    y = Math.cos(angulo*(Math.PI/180))*(10);
+                    angulo += aumentoDelAngulo;
+                    (canastas[i]).position.set(x, y, 0);
+                    rueda.add(canastas[i]);
+                }
+
+                //Postes
+                angulo = 0;
+                for(var i = 0; i < 16; i++)
+                {
+                    geometry = new THREE.CylinderGeometry(.1, .1, 10, 32);
+                    var tuboFrontal = new THREE.Mesh( geometry, materialTubo );
+                    var tuboTrasero = tuboFrontal.clone();
+                    var grupoFantasma = new THREE.Object3D();
+                    tuboFrontal.position.set(0, 5, 1.3);
+                    tuboTrasero.position.set(0, 5, -1.3);
+
+                    geometry = new THREE.CylinderGeometry(.1, .1, 2.6, 32);
+                    var tuboCentral = new THREE.Mesh( geometry, materialTubo );
+                    tuboCentral.rotation.x += 90 * (Math.PI/180);
+                    tuboCentral.position.set(0, 10, 0);
+
+                    grupoFantasma.add(tuboCentral);
+                    grupoFantasma.add(tuboFrontal);
+                    grupoFantasma.add(tuboTrasero);
+                    grupoFantasma.rotation.z += angulo * (Math.PI/180);
+                    angulo += aumentoDelAngulo;
+                    rueda.add(grupoFantasma);
+                }
+
+                //Disco central
+                geometry = new THREE.CylinderGeometry(1.5, 1.5, 6.5, 32);
+                var discoCentral = new THREE.Mesh( geometry, materialPisoExterior );
+                discoCentral.rotation.x += 90 * (Math.PI/180);
+                rueda.add(discoCentral);
+
+                //Patas
+                patas = new THREE.Object3D();
+                var p1 = generarPatas(.5, 15, 20, 20, 0, -7.5, -2);
+                patas.add(p1);
+                var p2 = generarPatas(.5, 15, 340, 340, 0, -7.5, 2);
+                patas.add(p2); 
+                var p3 = generarPatas(.5, 15, 20, 340, 0, -7.5, -2); 
+                patas.add(p3);
+                var p4 = generarPatas(.5, 15, 340, 20, 0, -7.5, 2); 
+                patas.add(p4);
+
+                geometry = new THREE.BoxGeometry(20, 1, 20);
+                var plataforma = new THREE.Mesh( geometry, materialPisoExterior );
+                plataforma.position.set(0, -13, 0);
+                geometry = new THREE.BoxGeometry(20, .1, 20);
+                var piso = new THREE.Mesh(geometry, materialPisoInterior);
+                piso.position.set(0, -12.5, 0);
+                patas.add(piso);
+                patas.add(plataforma);
+
+                return rueda;
+            }
+
+            function rotarRueda()
+            {
+                rueda.rotation.z += .001;
+                for(var i = 0; i < 16; i++)
+                {
+                    (canastas[i]).rotation.z -= .001;
+                }
+                scene.add(patas);
+            }
+
+            //tazas
+
+            var k = 0;
+            function hacerGrupoTazas()
+            {
+                var tazas = new THREE.Object3D();
+                var angulo = 0;
+                for(var i = 0; i < 4; i++)
+                {
+                    var gf = new THREE.Object3D();
+                    tazasIndividuales[k] = taza.clone();
+                    (tazasIndividuales[k]).position.set(0, 1, 3);
+                    gf.add(tazasIndividuales[k]);
+                    gf.rotation.y += angulo*(Math.PI/180);
+                    angulo += 90;
+                    tazas.add(gf);
+                    k++;
+                }
+
+                var geometry = new THREE.CylinderGeometry(4, 4, .5, 32);
+                var material = new THREE.MeshPhongMaterial( { color:0x009e9e9e } );
+                var plataforma = new THREE.Mesh( geometry, materialPisoExterior );
+                plataforma.position.set(0, 0, 0);
+                geometry = new THREE.CylinderGeometry(4, 4, .1, 32);
+                var piso = new THREE.Mesh(geometry, materialPisoInterior);
+                piso.position.set(0, .5, 0);
+                tazas.add(piso);
+                tazas.add(plataforma);
+
+                return tazas;
+            }
+
+            function hacerTazasLocas()
+            {
+                var grupoTazas = new THREE.Object3D();
+                var angulo = 0;
+                k = 0;
+                for(var i = 0; i < 4; i++)
+                {
+                    var gf = new THREE.Object3D();
+                    tresTazas[i] = hacerGrupoTazas();
+                    (tresTazas[i]).position.set(0, 0, 8);
+                    gf.add(tresTazas[i]);
+                    gf.rotation.y += angulo*(Math.PI/180);
+                    angulo += 90;
+                    grupoTazas.add(gf);
+                }
+
+                var geometry = new THREE.CylinderGeometry(12, 12, .5, 32);
+                var material = new THREE.MeshPhongMaterial( { color:0x009e9e9e } );
+                var plataforma = new THREE.Mesh( geometry, materialPisoExterior );
+                plataforma.position.set(0, -.5, 0);
+                geometry = new THREE.CylinderGeometry(12, 12, .1, 32);
+                var piso = new THREE.Mesh( geometry, materialPisoInterior );
+                piso.position.set(0, 0, 0);
+                grupoTazas.add(piso);
+                grupoTazas.add(plataforma);
+
+                return grupoTazas;
+            }
+
+            function rotarTazas()
+            {
+                tazasLocas.rotation.y += .01;
+                var flg = -1
+                for(var i = 0; i < 16; i++)
+                {
+                    (tazasIndividuales[i]).rotation.y += .05 * flg;
+                    flg *= -1;
+                }
+                for(var i = 0; i < 4; i++)
+                    (tresTazas[i]).rotation.y += .01;
+            }
+
+            function Load()
+            {
+                var onProgress = function ( xhr ) {
+                    if ( xhr.lengthComputable ) {
+                        var percentComplete = xhr.loaded / xhr.total * 100;
+                        console.log( Math.round(percentComplete, 2) + '% downloaded' );
+                    }
+                };
+                var onError = function ( xhr ) { };
+                THREE.Loader.Handlers.add( /\.dds$/i, new THREE.DDSLoader() );
+                
+                var mtlLoader = new THREE.MTLLoader();
+                
+                //LOAD CANASTA
+                var canastaC;
+                mtlLoader.load( 'obj/canastitaJP.mtl', function( materials ) {
+                    materials.preload();
+                    var objLoader = new THREE.OBJLoader();
+                    objLoader.setMaterials( materials );
+                    objLoader.load( 'obj/canastitaJP.obj', function ( object ) {
+                        canastaC = object;
+                        canasta.add(canastaC);
+                    }, onProgress, onError );
+                });
+
+                var tazaC;
+                mtlLoader.load( 'obj/tazaJP.mtl', function( materials ) {
+                    materials.preload();
+                    var objLoader = new THREE.OBJLoader();
+                    objLoader.load( 'obj/tazaJP.obj', function( object ) {
+                        tazaC = object;
+                        taza.add(tazaC);
+                    }, onProgress, onError );
+                });
+                
+            }
+
+            var canasta = new THREE.Mesh();
+            var patas;
+            var rueda;
+            var taza = new THREE.Mesh();
+            var tazasLocas;
+            var tazasIndividuales = [];
+            var tresTazas = [];
+            Load();
+
+            function pintarCarrusel() {
+
+            // piso 
+            var pisoInterior = new THREE.Mesh(new THREE.CylinderGeometry(20, 20, 2, 100), materialPisoInterior);
+            pisoInterior.position.set(0, -12, -25);
+            gcaballitos.add(pisoInterior);
+
+            var material2 = new THREE.MeshBasicMaterial( {color: 0x000000} );
+            var pisoExterior = new THREE.Mesh(new THREE.CylinderGeometry(20.3, 20.3, 1.9, 100), materialPisoExterior);
+            pisoExterior.position.set(0, -12, -25);
+            gcaballitos.add(pisoExterior);
+
+
+            // techo 
+
+            var techoExterior = new THREE.Mesh(new THREE.CylinderGeometry(20.3, 20.3, 4, 100), materialPisoExterior);
+            techoExterior.position.set(0, 15, -25);
+            gcaballitos.add(techoExterior);
+
+            var techoExteriorArriba = new THREE.Mesh(new THREE.CylinderGeometry(0, 20, 10, 100, 100), materialPisoExterior);
+            techoExteriorArriba.position.set(0, 22, -25);
+            gcaballitos.add(techoExteriorArriba);
+
+
+            // centro
+            var centro = new THREE.Mesh(new THREE.CylinderGeometry(7, 7, 26, 16, 16), materialCentro);
+            centro.position.set(0, 1, -25.5);
+            scene.add(centro);
+
+
+            // tubos
+
+            var tubo = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 30, 100), materialTubo);
+            var tubo2 = tubo.clone();
+            var tubo3 = tubo.clone();
+            var tubo4 = tubo.clone();
+            var tubo5 = tubo.clone();
+            var tubo6 = tubo.clone();
+            var tubo7 = tubo.clone();
+            var tubo8 = tubo.clone();
+            var tubo9 = tubo.clone();
+            var tubo10 = tubo.clone();
+            var tubo11 = tubo.clone();
+            var tubo12 = tubo.clone();
+            var tubo13 = tubo.clone();
+            var tubo14 = tubo.clone();
+            var tubo15 = tubo.clone();
+            var tubo16 = tubo.clone();
+            var tubo17 = tubo.clone();
+
+            tubo.position.set(5, 2, -9);
+            tubo2.position.set(5, 2, -15);
+            tubo3.position.set(-5, 2, -9);
+            tubo4.position.set(-5, 2, -15);
+            tubo5.position.set(-14, 2, -15);
+            tubo6.position.set(-11, 2, -21);
+            tubo7.position.set(-17, 2, -25);
+            tubo8.position.set(-12, 2, -29);
+            tubo9.position.set(-14, 2, -34);
+            tubo10.position.set(-7, 2, -35);
+            tubo11.position.set(-7, 2, -41);
+            tubo12.position.set(2, 2, -37);
+            tubo13.position.set(2, 2, -42);
+            tubo14.position.set(10, 2, -32);
+            tubo15.position.set(14, 2, -36);
+            tubo16.position.set(12, 2, -22);
+            tubo17.position.set(16, 2, -19);
+
+            gcaballitos.add(tubo);
+            gcaballitos.add(tubo2);
+            gcaballitos.add(tubo3);
+            gcaballitos.add(tubo4);
+            gcaballitos.add(tubo5);
+            gcaballitos.add(tubo6);
+            gcaballitos.add(tubo7);
+            gcaballitos.add(tubo8);
+            gcaballitos.add(tubo9);
+            gcaballitos.add(tubo10);
+            gcaballitos.add(tubo11);
+            gcaballitos.add(tubo12);
+            gcaballitos.add(tubo13);
+            gcaballitos.add(tubo14);
+            gcaballitos.add(tubo15);
+            gcaballitos.add(tubo16);
+            gcaballitos.add(tubo17);
+
+
+            // caballos
+
+            var loader = new THREE.JSONLoader(true);
+            loader.load( "horse.js", function( geometry ) {
+                    horse = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial({color: 0x8b6845, morphTargets: true}));
+                    horse.scale.set(0.035, 0.035, 0.035);
+                    horse2 = horse.clone();
+                    horse3 = horse.clone();
+                    horse4 = horse.clone();
+                    horse5 = horse.clone();
+                    horse6 = horse.clone();
+                    horse7 = horse.clone();
+                    horse8 = horse.clone();
+                    horse9 = horse.clone();
+                    horse10 = horse.clone();
+                    horse11 = horse.clone();
+                    horse12 = horse.clone();
+                    horse13 = horse.clone();
+                    horse14 = horse.clone();
+                    horse15 = horse.clone();
+                    horse16 = horse.clone();
+                    horse17 = horse.clone();
+
+
+                    horse.position.set(5, -6, -9);
+                    horse.rotation.set(0, -1, 0);
+
+                    horse2.rotation.set(0, -1, 0);
+                    horse2.position.set(5, -6, -15);
+
+                    horse3.rotation.set(0, -1.5, 0);
+                    horse3.position.set(-5, -6, -9);
+
+                    horse4.rotation.set(0, -1.5, 0);
+                    horse4.position.set(-5, -6, -15);
+
+                    horse5.rotation.set(0, -2.5, 0);
+                    horse5.position.set(-14, -6, -15);
+
+                    horse6.rotation.set(0, -2.5, 0);
+                    horse6.position.set(-11, -6, -21);
+
+                    horse7.rotation.set(0, -3, 0);
+                    horse7.position.set(-17, -6, -25);
+
+                    horse8.rotation.set(0, -3, 0);
+                    horse8.position.set(-12, -6, -29);
+
+                    horse9.rotation.set(0, -3.5, 0);
+                    horse9.position.set(-14, -6, -34);
+
+                    horse10.rotation.set(0, -4, 0);
+                    horse10.position.set(-7, -6, -35);
+
+                    horse11.rotation.set(0, -4, 0);
+                    horse11.position.set(-7, -6, -41);
+
+                    horse12.rotation.set(0, -4.5, 0);
+                    horse12.position.set(2, -6, -37);
+
+                    horse13.rotation.set(0, -4.5, 0);
+                    horse13.position.set(2, -6, -42);
+
+                    horse14.rotation.set(0, -5.5, 0);
+                    horse14.position.set(10, -6, -32);
+
+                    horse15.rotation.set(0, -5.5, 0);
+                    horse15.position.set(14, -6, -36);
+
+                    horse16.rotation.set(0, -6.5, 0);
+                    horse16.position.set(12, -6, -22);
+
+                    horse17.rotation.set(0, -6.5, 0);
+                    horse17.position.set(16, -6, -19);
+
+                    gcaballitos1.add(horse);
+                    gcaballitos2.add(horse2);
+                    gcaballitos3.add(horse3);
+                    gcaballitos1.add(horse4);
+                    gcaballitos2.add(horse5);
+                    gcaballitos3.add(horse6);
+                    gcaballitos1.add(horse7);
+                    gcaballitos2.add(horse8);
+                    gcaballitos3.add(horse9);
+                    gcaballitos1.add(horse10);
+                    gcaballitos2.add(horse11);
+                    gcaballitos3.add(horse12);
+                    gcaballitos1.add(horse13);
+                    gcaballitos2.add(horse14);
+                    gcaballitos3.add(horse15);
+                    gcaballitos1.add(horse16);
+                    gcaballitos2.add(horse17);
+                } );
+
+            gcaballitos.add(gcaballitos1);
+            gcaballitos.add(gcaballitos2);
+            gcaballitos.add(gcaballitos3);
+
+            gcaballitos.position.y += 20;
+            gcaballitos.position.z += 25;
+
+            gcaballitosContainer.add(gcaballitos);
+
+            gcaballitosContainer.position.y -= 20;
+            gcaballitosContainer.position.z -= 25;
+
+            scene.add(gcaballitosContainer);
+
+            // add the group to the scene                  
+            
+            renderer.setSize(window.innerWidth, window.innerHeight); 
+            document.body.appendChild(renderer.domElement); 
+
+            camera.position.z = cam_zpos; 
+
+            // create some point lights
+            var pointLight = new THREE.PointLight( 0xFFFFFF );
+            var pointLight2 = new THREE.PointLight( 0xFFFFFF );
+
+            // set its position
+            pointLight.position.x = 10;
+            pointLight.position.y = 50;
+            pointLight.position.z = 130;
+
+            // add to the scene
+            scene.add(pointLight);
+            
+            // set its position
+            pointLight2.position.x = 10;
+            pointLight2.position.y = -50;
+            pointLight2.position.z = -130;
+
+            // add to the scene
+            scene.add(pointLight2);
+            
+            // set the background color
+            renderer.setClearColor(0X000000, 1);
+
+            function rotarCarrusel(){
+                gcaballitosContainer.rotation.y -= 0.007;
+            }
+
+            var banderaCaballitos1 = 0;
+            var banderaCaballitos2 = 0;
+            var banderaCaballitos3 = 0;
+            function subirYBajarCaballitos(){
+                if(banderaCaballitos1 == 0){
+                    if(gcaballitos1.position.y >= 5){
+                        banderaCaballitos1 = 1;
+                    }
+                    gcaballitos1.position.y += 0.03;
+                }
+                else {
+                    if(gcaballitos1.position.y <= -1){
+                        banderaCaballitos1 = 0;
+                    }
+                    gcaballitos1.position.y -= 0.03;
+                }
+
+                if(banderaCaballitos2 == 1){
+                    if(gcaballitos2.position.y >= 4){
+                        banderaCaballitos2 = 0;
+                    }
+                    gcaballitos2.position.y += 0.06;
+                }
+                else {
+                    if(gcaballitos2.position.y <= 0){
+                        banderaCaballitos2 = 1;
+                    }
+                    gcaballitos2.position.y -= 0.06;
+                }
+
+                if(banderaCaballitos3 == 0){
+                    if(gcaballitos3.position.y >= 5){
+                        banderaCaballitos3 = 1;
+                    }
+                    gcaballitos3.position.y += 0.08;
+                }
+                else {
+                    if(gcaballitos3.position.y <= -1){
+                        banderaCaballitos3 = 0;
+                    }
+                    gcaballitos3.position.y -= 0.08;
+                }
+            }
+
+            setTimeout(function() {
+
+                var geometry = new THREE.BoxGeometry(500, 1, 500);
+                var material = new THREE.MeshPhongMaterial( { color:996633 } );
+                var suelo = new THREE.Mesh( geometry, material );
+                suelo.position.set(0, -15, 0);
+                scene.add(suelo);
+
+                //Rueda
+                rueda = hacerRueda();
+                rueda.position.set(0, 0, -15);
+                patas.position.set(0, 0, -15);
+                scene.add(rueda);
+
+                //Tazas Locas
+                tazasLocas = hacerTazasLocas();
+                tazasLocas.position.set(30, -13, -15);
+                scene.add(tazasLocas);
+
+                gcaballitosContainer.position.set(-25, -16, -15);
+                gcaballitosContainer.scale.set(.3, .3, .3);
+                centro.scale.set(.3, .3, .3);
+                centro.position.set(-25, -10, -15);
+
+                var render = function () { 
+                    requestAnimationFrame(render);  
+                    rotarCarrusel();
+                    subirYBajarCaballitos();  
+                    rotarRueda();
+                    rotarTazas();           
+                    renderer.render(scene, camera); 
+                }; 
+                render();
+            }, 400);         
+            };
+
+            
+        </script> 
+    </body> 
+</html>

@@ -13,8 +13,9 @@
         <script src="js/loaders/DDSLoader.js"></script>
         <script src="js/loaders/MTLLoader.js"></script>
         <script src="js/loaders/OBJLoader.js"></script>
-        <script type="text/javascript" src="https://rawgit.com/mrdoob/three.js/master/build/three.min.js"></script>
+        <script src="js/three2.min.js"> </script> 
         <script src="js/ThreeCSG.js"></script>
+        <script src="js/SubdivisionModifier.js"></script>
         <script>
 
             window.addEventListener('keydown',doKeyDown,true);
@@ -82,12 +83,18 @@
             var materialPisoInterior;
             var materialPisoExterior;
             var materialTubo;
+            var materialCoche;
 
             var texturasArray = [
                                 {name: 'texturaPiso', url: 'pisoMadera.jpg'},
                                 {name: 'texturaPisoExt', url: 'pisoVintage.jpg'},
                                 {name: 'texturaTubo', url: 'tuboTextura.jpg'},
-                                {name: 'texturaTubo', url: 'espejoCentro.jpg'}
+                                {name: 'texturaTubo', url: 'espejoCentro.jpg'},
+                                {name: 'texturaCoche', url: 'carTexture.jpg'},
+                                {name: 'texturaLlanta', url: 'texturaLlanta.jpg'},
+                                {name: 'texturaVentanas', url: 'windowTexture.jpg'},
+                                {name: 'texturaInteriores', url: 'interiorTextura.jpg'},
+                                {name: 'texturaAsientos', url: 'interiorAsientosTextura.jpg'}
                                 ];
             
             cargarTexturas();
@@ -123,7 +130,12 @@
                         materialPisoInterior = new THREE.MeshBasicMaterial({map: texturas[0]});   
                         materialPisoExterior = new THREE.MeshBasicMaterial({map: texturas[1]}); 
                         materialTubo = new THREE.MeshBasicMaterial({map: texturas[2]});
-                        materialCentro = new THREE.MeshBasicMaterial({map: texturas[3]});                  
+                        materialCentro = new THREE.MeshBasicMaterial({map: texturas[3]});  
+                        materialCoche = new THREE.MeshBasicMaterial({map: texturas[4]});  
+                        materialLlantas = new THREE.MeshBasicMaterial({map: texturas[5]});
+                        materialVentanas = new THREE.MeshBasicMaterial({map: texturas[6]});  
+                        materialInteriores = new THREE.MeshBasicMaterial({map: texturas[7]});   
+                        materialAsientos = new THREE.MeshBasicMaterial({map: texturas[8]});                  
                         pintarCarrusel();        
                         pintarCoche();            
                     },
@@ -364,13 +376,12 @@
             var tresTazas = [];
             Load();
 
-                       function pintarCoche(){
-                var materialLlantas = new THREE.MeshBasicMaterial ({ color: 333333 });
-                var materialCoche = new THREE.MeshLambertMaterial({color: 0xCC0000});
+            
+            function pintarCoche(){
 
                 // parte de adelante llantas
-                var cocheParteAdelante = new THREE.Mesh(new THREE.CubeGeometry(12, 9, 20, 1, 1, 1));
-                cocheParteAdelante.position.set(31, -14, -25);
+                var cocheParteAdelante = new THREE.Mesh(new THREE.CubeGeometry(16, 9, 20, 1, 1, 1));
+                cocheParteAdelante.position.set(29, -14, -25);
                 var cocheParteAdelante_bsp = new ThreeBSP(cocheParteAdelante);
 
                 // Llanta hoyo
@@ -380,7 +391,7 @@
                 var llantaHoyo_bsp = new ThreeBSP(llantaHoyo);
 
                 var subtract_bsp = cocheParteAdelante_bsp.subtract(llantaHoyo_bsp);
-                var result = subtract_bsp.toMesh(new THREE.MeshLambertMaterial({ shading: THREE.SmoothShading, color: 0xCC0000}));
+                var result = subtract_bsp.toMesh(materialCoche);
                 result.geometry.computeVertexNormals();
                 gcocheContainer.add(result);
 
@@ -397,7 +408,7 @@
                 var llanta1_bsp = new ThreeBSP(llanta1);
 
                 var subtract_bsp = llanta1_bsp.subtract(llanta1HoyoInterior_bsp);
-                var result = subtract_bsp.toMesh(new THREE.MeshLambertMaterial({shading: THREE.SmoothShading, color: 333333}));
+                var result = subtract_bsp.toMesh(materialLlantas);
                 result.geometry.computeVertexNormals();
                 gcocheContainer.add(result);
 
@@ -414,66 +425,9 @@
                 var llanta2_bsp = new ThreeBSP(llanta2);
 
                 var subtract2_bsp = llanta2_bsp.subtract(llanta2HoyoInterior_bsp);
-                var result2 = subtract2_bsp.toMesh(new THREE.MeshLambertMaterial({ shading: THREE.SmoothShading, color: 333333}));
+                var result2 = subtract2_bsp.toMesh(materialLlantas);
                 result2.geometry.computeVertexNormals();
                 gcocheContainer.add(result2);
-
-                // parte de hasta adelante
-                var cocheHastaAdelante = new THREE.Mesh(new THREE.BoxGeometry(10, 9, 20, 1, 1, 1), materialCoche);
-                cocheHastaAdelante.position.set(22, -14, -25);
-                gcocheContainer.add(cocheHastaAdelante);
-
-                // parte de enmedio
-                var cocheEnmedio = new THREE.Mesh(new THREE.BoxGeometry(17, 20, 20, 1, 1, 1));
-                cocheEnmedio.position.set(45.5, -8.5, -25);
-                var cocheEnmedio_bsp = new ThreeBSP(cocheEnmedio);
-
-                // parte de enmedio hoyo
-                var cocheEnmedioHoyo = new THREE.Mesh(new THREE.BoxGeometry(14, 17, 20, 1, 1, 1));
-                cocheEnmedioHoyo.position.set(45.5, -8, -25);
-                var cocheEnmedioHoyo_bsp = new ThreeBSP(cocheEnmedioHoyo);
-
-                // parte de enmedio hoyo frente
-                var cocheEnmedioHoyoFrente = new THREE.Mesh(new THREE.BoxGeometry(21, 8, 16, 1, 1, 1));
-                cocheEnmedioHoyoFrente.position.set(45.5, -4, -25);
-                var cocheEnmedioHoyoFrente_bsp = new ThreeBSP(cocheEnmedioHoyoFrente);
-
-                var union_bsp = cocheEnmedioHoyo_bsp.union(cocheEnmedioHoyoFrente_bsp);
-
-                var subtract_bsp = cocheEnmedio_bsp.subtract(union_bsp);
-                var result = subtract_bsp.toMesh(materialCoche);
-                result.geometry.computeVertexNormals();
-                gcocheContainer.add(result);
-
-                // puerta izq
-                var puertaIzq = new THREE.Mesh(new THREE.BoxGeometry(16, 9, 2, 1, 1, 1), materialCoche);
-                puertaIzq.position.set(45.5, -12, -16);
-                //scene.add(puertaIzq);
-
-                // ventana puerta izq
-                var ventanaPuertaIzq = new THREE.Mesh(new THREE.BoxGeometry(16, 8, 1, 1, 1, 1), materialLlantas);
-                ventanaPuertaIzq.position.set(45.5, -3.5, -16);
-                //scene.add(ventanaPuertaIzq);
-
-                // puerta der
-                var puertaDer = new THREE.Mesh(new THREE.BoxGeometry(16, 9, 2, 1, 1, 1), materialCoche);
-                puertaDer.position.set(45.5, -12, -34);
-                //scene.add(puertaDer);
-
-                // ventana puerta Der
-                var ventanaPuertaDer = new THREE.Mesh(new THREE.BoxGeometry(16, 8, 1, 1, 1, 1), materialLlantas);
-                ventanaPuertaDer.position.set(45.5, -3.5, -34);
-                //scene.add(ventanaPuertaDer)
-
-                // parabrisas
-                var parabrisas = new THREE.Mesh(new THREE.BoxGeometry(1, 8, 16, 1, 1, 1), materialLlantas);
-                parabrisas.position.set(37.5, -4, -25);
-                gcocheContainer.add(parabrisas);
-
-                // parabrisasAtras
-                var parabrisasAtras = new THREE.Mesh(new THREE.BoxGeometry(1, 8, 16, 1, 1, 1), materialLlantas);
-                parabrisasAtras.position.set(53.5, -4, -25);
-                gcocheContainer.add(parabrisasAtras);
 
                 // parte de atras llantas
                 var cocheParteAtras = new THREE.Mesh(new THREE.CubeGeometry(12, 9, 20, 1, 1, 1));
@@ -487,7 +441,7 @@
                 var llantaHoyoAtras_bsp = new ThreeBSP(llantaHoyoAtras);
 
                 var subtract_bsp = cocheParteAtras_bsp.subtract(llantaHoyoAtras_bsp);
-                var result = subtract_bsp.toMesh(new THREE.MeshLambertMaterial({ shading: THREE.SmoothShading, color: 0xCC0000}));
+                var result = subtract_bsp.toMesh(materialCoche);
                 result.geometry.computeVertexNormals();
                 gcocheContainer.add(result);
 
@@ -504,7 +458,7 @@
                 var llanta3_bsp = new ThreeBSP(llanta3);
 
                 var subtract_bsp = llanta3_bsp.subtract(llanta3HoyoInterior_bsp);
-                var result = subtract_bsp.toMesh(new THREE.MeshLambertMaterial({shading: THREE.SmoothShading, color: 333333}));
+                var result = subtract_bsp.toMesh(materialLlantas);
                 result.geometry.computeVertexNormals();
                 gcocheContainer.add(result);
 
@@ -522,9 +476,147 @@
 
 
                 var subtract_bsp = llanta4_bsp.subtract(llanta4HoyoInterior_bsp);
-                var result = subtract_bsp.toMesh(new THREE.MeshLambertMaterial({shading: THREE.SmoothShading, color: 333333}));
+                var result = subtract_bsp.toMesh(materialLlantas);
                 result.geometry.computeVertexNormals();
                 gcocheContainer.add(result);
+
+
+                // parte de enmedio
+                var cocheEnmedio = new THREE.Mesh(new THREE.BoxGeometry(17, 20, 20, 1, 1, 1));
+                cocheEnmedio.position.set(45.5, -8.5, -25);
+                var cocheEnmedio_bsp = new ThreeBSP(cocheEnmedio);
+
+                // parte de enmedio hoyo
+                var cocheEnmedioHoyo = new THREE.Mesh(new THREE.BoxGeometry(14, 17, 20, 1, 1, 1));
+                cocheEnmedioHoyo.position.set(45.5, -8, -25);
+                var cocheEnmedioHoyo_bsp = new ThreeBSP(cocheEnmedioHoyo);
+
+                // parte de enmedio hoyo frente
+                var cocheEnmedioHoyoFrente = new THREE.Mesh(new THREE.BoxGeometry(18, 8, 16, 1, 1, 1));
+                cocheEnmedioHoyoFrente.position.set(45.5, -4, -25);
+                var cocheEnmedioHoyoFrente_bsp = new ThreeBSP(cocheEnmedioHoyoFrente);
+
+                var union_bsp = cocheEnmedioHoyo_bsp.union(cocheEnmedioHoyoFrente_bsp);
+
+                var subtract_bsp = cocheEnmedio_bsp.subtract(union_bsp);
+                var result = subtract_bsp.toMesh(materialCoche);
+                result.geometry.computeVertexNormals();
+                gcocheContainer.add(result);
+
+                // interiores
+
+                // interiores izq
+                var cocheInteriores = new THREE.Mesh(new THREE.BoxGeometry(0.2, 17, 19, 1, 1, 1), materialInteriores);
+                cocheInteriores.position.set(38.5, -8, -25);
+                var cocheInteriores_bsp = new ThreeBSP(cocheInteriores);
+
+                var subtract_bsp = cocheInteriores_bsp.subtract(cocheEnmedioHoyoFrente_bsp);
+                var result = subtract_bsp.toMesh(materialInteriores);
+                result.geometry.computeVertexNormals();
+                gcocheContainer.add(result);
+
+                // interiores der
+                var cocheInterioresDer = new THREE.Mesh(new THREE.BoxGeometry(0.2, 17, 19, 1, 1, 1), materialInteriores);
+                cocheInterioresDer.position.set(52.5, -8, -25);
+                var cocheInterioresDer_bsp = new ThreeBSP(cocheInterioresDer);
+
+                var subtract_bsp = cocheInterioresDer_bsp.subtract(cocheEnmedioHoyoFrente_bsp);
+                var result = subtract_bsp.toMesh(materialInteriores);
+                result.geometry.computeVertexNormals();
+                gcocheContainer.add(result);
+
+
+                // interiores abajo
+                var cocheInterioresAbajo = new THREE.Mesh(new THREE.BoxGeometry(14, 0.2, 19, 1, 1, 1), materialInteriores);
+                cocheInterioresAbajo.position.set(45.5, -16.5, -25);
+                gcocheContainer.add(cocheInterioresAbajo);
+
+                // interiores arriba
+                var cocheInterioresArriba = new THREE.Mesh(new THREE.BoxGeometry(14, 0.2, 19, 1, 1, 1), materialInteriores);
+                cocheInterioresArriba.position.set(45.5, 0.5, -25);
+                gcocheContainer.add(cocheInterioresArriba);
+
+
+                // puerta izq
+                var puertaIzq = new THREE.Mesh(new THREE.BoxGeometry(16, 9, 2, 1, 1, 1), materialCoche);
+                puertaIzq.position.set(45.5, -12, -16);
+                gcocheContainer.add(puertaIzq);
+
+                // interiores puerta Izq
+                var puertaIzqInteriores = new THREE.Mesh(new THREE.BoxGeometry(16, 9, 0.2, 1, 1, 1), materialInteriores);
+                puertaIzqInteriores.position.set(45.5, -12, -17);
+                gcocheContainer.add(puertaIzqInteriores);
+
+                // ventana puerta izq
+                var ventanaPuertaIzq = new THREE.Mesh(new THREE.BoxGeometry(16, 8, 1, 1, 1, 1), materialVentanas);
+                ventanaPuertaIzq.position.set(45.5, -3.5, -16);
+                gcocheContainer.add(ventanaPuertaIzq);
+
+                // puerta der
+                var puertaDer = new THREE.Mesh(new THREE.BoxGeometry(16, 9, 2, 1, 1, 1), materialCoche);
+                puertaDer.position.set(45.5, -12, -34);
+                gcocheContainer.add(puertaDer);
+
+                // interiores puerta der
+                var puertaDerInteriores = new THREE.Mesh(new THREE.BoxGeometry(16, 9, 0.2, 1, 1, 1), materialInteriores);
+                puertaDerInteriores.position.set(45, -12, -33);
+                gcocheContainer.add(puertaDerInteriores);
+
+                // ventana puerta Der
+                var ventanaPuertaDer = new THREE.Mesh(new THREE.BoxGeometry(16, 8, 1, 1, 1, 1), materialVentanas);
+                ventanaPuertaDer.position.set(45.5, -3.5, -34);
+                gcocheContainer.add(ventanaPuertaDer)
+
+                // Asiento 1 abajo
+                var asientoIzqGeom = new THREE.BoxGeometry(10, 4, 10, 1, 1, 1);
+
+                var modifier = new THREE.SubdivisionModifier(2);
+                modifier.modify(asientoIzqGeom);
+
+                var asientoIzq = new THREE.Mesh(asientoIzqGeom, materialAsientos);
+                asientoIzq.position.set(47, -15, -20);
+                gcocheContainer.add(asientoIzq);
+
+                // Asiento 1 arriba 
+
+                var asientoIzqArribaGeom = new THREE.BoxGeometry(4, 14, 10, 1, 1, 1);
+
+                var modifier = new THREE.SubdivisionModifier(2);
+                modifier.modify(asientoIzqArribaGeom);
+
+                var asientoIzqArriba = new THREE.Mesh(asientoIzqArribaGeom, materialAsientos);
+                asientoIzqArriba.position.set(50, -10, -20);
+                gcocheContainer.add(asientoIzqArriba);
+
+                // Asiento 2 abajo
+                var asientoDerGeom = new THREE.BoxGeometry(10, 4, 10, 1, 1, 1);
+
+                var asientoDer = new THREE.Mesh(asientoDerGeom, materialAsientos);
+                modifier.modify(asientoDerGeom);
+                asientoDer.position.set(47, -15, -30);
+                gcocheContainer.add(asientoDer);
+
+                // Asiento 2 arriba 
+
+                var asientoDerArribaGeom = new THREE.BoxGeometry(4, 14, 10, 1, 1, 1);
+
+                var modifier = new THREE.SubdivisionModifier(2);
+                modifier.modify(asientoDerArribaGeom);
+
+                var asientoDerArriba = new THREE.Mesh(asientoDerArribaGeom, materialAsientos);
+                asientoDerArriba.position.set(50, -10, -30);
+                gcocheContainer.add(asientoDerArriba);
+
+                // parabrisas
+                var parabrisas = new THREE.Mesh(new THREE.BoxGeometry(1, 8, 16, 1, 1, 1), materialVentanas);
+                parabrisas.position.set(37.5, -4, -25);
+                gcocheContainer.add(parabrisas);
+
+                // parabrisasAtras
+                var parabrisasAtras = new THREE.Mesh(new THREE.BoxGeometry(1, 8, 16, 1, 1, 1), materialVentanas);
+                parabrisasAtras.position.set(53.5, -4, -25);
+                gcocheContainer.add(parabrisasAtras);
+
 
                 scene.add(gcocheContainer);
 

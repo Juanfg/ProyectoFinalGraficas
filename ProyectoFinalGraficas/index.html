@@ -1046,6 +1046,105 @@
                 }
             }
 
+            function crearConstruccion()
+            {
+                var cancha = new THREE.Object3D();
+                var geometry;
+                var material;
+                var box, circle, ring;
+
+                //Hacer cancha
+                geometry = new THREE.BoxGeometry(35, 22.5, .01);
+                material = new THREE.MeshPhongMaterial( {color: 0xd35400, side: THREE.DoubleSide} );
+                box = new THREE.Mesh(geometry, material);
+                box.rotation.x += 90*(Math.PI/180);
+                cancha.add(box);
+
+                geometry = new THREE.BoxGeometry(30, 27.5, .01);
+                material = new THREE.MeshPhongMaterial( {color: 0xd35400, side: THREE.DoubleSide} );
+                box = new THREE.Mesh(geometry, material);
+                box.rotation.x += 90*(Math.PI/180);
+                cancha.add(box);
+
+                var xs = [-1, 1, -1, 1];
+                var zs = [1, -1, -1, 1];
+
+                for(var i = 0; i < 4; i++)
+                {
+                    geometry = new THREE.CircleGeometry(2.5, 32);
+                    material = new THREE.MeshPhongMaterial( {color: 0xd35400, side: THREE.DoubleSide} );
+                    circle = new THREE.Mesh(geometry, material);
+                    circle.rotation.x += 90*(Math.PI/180);
+                    circle.position.set(15*xs[i], 0, 11.25*zs[i]);
+                    cancha.add(circle);
+                }
+
+                geometry = new THREE.BoxGeometry(30, 22.5, .02);
+                material = new THREE.MeshPhongMaterial( {color: 0x33ff38, side: THREE.DoubleSide} );
+                box = new THREE.Mesh(geometry, material);
+                box.rotation.x += 90*(Math.PI/180);
+                cancha.add(box);
+
+                //Lineas blancas del campo
+                for(var i = 0; i < 2; i++)
+                {
+                    geometry = new THREE.BoxGeometry(.5, 22.5, .025);
+                    material = new THREE.MeshPhongMaterial( {color: 0xffffff, side: THREE.DoubleSide} );
+                    box = new THREE.Mesh(geometry, material);
+                    box.rotation.x += 90*(Math.PI/180);
+                    box.position.set(13.5*xs[i], 0, 0);
+                    cancha.add(box);
+                }
+
+                geometry = new THREE.BoxGeometry(.5, 19.5, .025);
+                material = new THREE.MeshPhongMaterial( {color: 0xffffff, side: THREE.DoubleSide} );
+                box = new THREE.Mesh(geometry, material);
+                box.rotation.x += 90*(Math.PI/180);
+                box.position.set(0, 0, 0);
+                cancha.add(box);
+
+                for(var i = 0; i < 2; i++)
+                {
+                    geometry = new THREE.BoxGeometry(.5, 6, .025);
+                    material = new THREE.MeshPhongMaterial( {color: 0xffffff, side: THREE.DoubleSide} );
+                    box = new THREE.Mesh(geometry, material);
+                    box.rotation.x += 90*(Math.PI/180);
+                    box.position.set(9.75*xs[i], 0, 0);
+                    cancha.add(box);
+                }
+
+                for(var i = 0; i < 2; i++)
+                {
+                    geometry = new THREE.BoxGeometry(30, .5, .025);
+                    material = new THREE.MeshPhongMaterial( {color: 0xffffff, side: THREE.DoubleSide} );
+                    box = new THREE.Mesh(geometry, material);
+                    box.rotation.x += 90*(Math.PI/180);
+                    box.position.set(0, 0, 9.75*zs[i]);
+                    cancha.add(box);
+                }
+
+                for(var i = 0; i < 4; i++)
+                {
+                    geometry = geometry = new THREE.BoxGeometry(4, .5, .025);
+                    material = new THREE.MeshPhongMaterial( {color: 0xffffff, side: THREE.DoubleSide} );
+                    box = new THREE.Mesh(geometry, material);
+                    box.rotation.x += 90*(Math.PI/180);
+                    box.position.set(11.5*xs[i], 0, 3*zs[i]);
+                    cancha.add(box);
+                }
+
+                geometry = new THREE.RingGeometry(3.5, 4, 32);
+                material = new THREE.MeshPhongMaterial( {color: 0xffffff, side: THREE.DoubleSide} );
+                ring = new THREE.Mesh(geometry, material);
+                ring.rotation.x += 90*(Math.PI/180);
+                ring.position.set(0, .3, 0);
+                cancha.add(ring);
+
+                cancha.position.set(0, -14, 100);
+                cancha.scale.set(2, 2, 2);
+                scene.add(cancha);
+            }
+
 
             setTimeout(function() {
 
@@ -1080,7 +1179,8 @@
                     rotarCarrusel();
                     subirYBajarCaballitos();  
                     rotarRueda();
-                    rotarTazas();           
+                    rotarTazas();     
+                    crearConstruccion();   
                     renderer.render(scene, camera); 
                 }; 
                 render();

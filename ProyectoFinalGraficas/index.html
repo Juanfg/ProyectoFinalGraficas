@@ -138,7 +138,8 @@
                                 {name: 'texturaLlanta', url: 'texturaLlanta.jpg'},
                                 {name: 'texturaVentanas', url: 'windowTexture.jpg'},
                                 {name: 'texturaInteriores', url: 'interiorTextura.jpg'},
-                                {name: 'texturaAsientos', url: 'interiorAsientosTextura.jpg'}
+                                {name: 'texturaAsientos', url: 'interiorAsientosTextura.jpg'},
+                                {name: 'texturasSillas', url: 'asientosMetalicos.jpg'}
                                 ];
             
             cargarTexturas();
@@ -179,7 +180,8 @@
                         materialLlantas = new THREE.MeshBasicMaterial({map: texturas[5]});
                         materialVentanas = new THREE.MeshBasicMaterial({map: texturas[6]});  
                         materialInteriores = new THREE.MeshBasicMaterial({map: texturas[7]});   
-                        materialAsientos = new THREE.MeshBasicMaterial({map: texturas[8]});                  
+                        materialAsientos = new THREE.MeshBasicMaterial({map: texturas[8]}); 
+                        materialSillas = new THREE.MeshBasicMaterial({map: texturas[9]});                 
                         pintarCarrusel();        
                         pintarCoche();            
                     },
@@ -1046,12 +1048,48 @@
                 }
             }
 
+            function hacerSillas()
+            {
+                var asientoIzqGeom = new THREE.BoxGeometry(10, 4, 10, 1, 1, 1);
+
+                var modifier = new THREE.SubdivisionModifier(2);
+                modifier.modify(asientoIzqGeom);
+
+                var material = new THREE.MeshPhongMaterial( {color: 0xd3d3d3, side: THREE.DoubleSide} );
+                var asientoIzq = new THREE.Mesh(asientoIzqGeom, materialSillas);
+                asientoIzq.position.set(47, -15, -20);
+                var asiento = new THREE.Object3D();
+                asiento.add(asientoIzq);
+
+                var asientoIzqGeom = new THREE.BoxGeometry(10, 4, 10, 1, 1, 1);
+
+                var modifier = new THREE.SubdivisionModifier(2);
+                modifier.modify(asientoIzqGeom);
+
+                var asientoIzq = new THREE.Mesh(asientoIzqGeom, materialSillas);
+                asientoIzq.position.set(47, -15, -20);
+
+                // Asiento 1 arriba 
+
+                var asientoIzqArribaGeom = new THREE.BoxGeometry(4, 14, 10, 1, 1, 1);
+
+                var modifier = new THREE.SubdivisionModifier(2);
+                modifier.modify(asientoIzqArribaGeom);
+
+                var asientoIzqArriba = new THREE.Mesh(asientoIzqArribaGeom, materialSillas);
+                asientoIzqArriba.position.set(50, -10, -20);
+                asiento.add(asientoIzqArriba);
+                return asiento;
+            }
+
             function crearConstruccion()
             {
                 var cancha = new THREE.Object3D();
+                var gradas = new THREE.Object3D();
+                var estadio = new THREE.Object3D();
                 var geometry;
                 var material;
-                var box, circle, ring;
+                var box, circle, ring, cylinder;
 
                 //Hacer cancha
                 geometry = new THREE.BoxGeometry(35, 22.5, .01);
@@ -1125,7 +1163,7 @@
 
                 for(var i = 0; i < 4; i++)
                 {
-                    geometry = geometry = new THREE.BoxGeometry(4, .5, .025);
+                    geometry = new THREE.BoxGeometry(4, .5, .025);
                     material = new THREE.MeshPhongMaterial( {color: 0xffffff, side: THREE.DoubleSide} );
                     box = new THREE.Mesh(geometry, material);
                     box.rotation.x += 90*(Math.PI/180);
@@ -1140,9 +1178,84 @@
                 ring.position.set(0, .3, 0);
                 cancha.add(ring);
 
-                cancha.position.set(0, -14, 100);
-                cancha.scale.set(2, 2, 2);
-                scene.add(cancha);
+                for(var i = 0; i < 2; i++)
+                {
+                    geometry = new THREE.BoxGeometry(30, 2, .025);
+                    material = new THREE.MeshPhongMaterial( {color: 0xffffff, side: THREE.DoubleSide} );
+                    box = new THREE.Mesh(geometry, material);
+                    box.position.set(0, 1, 13.75*zs[i]);
+                    cancha.add(box);
+                }
+
+                for(var i = 0; i < 2; i++)
+                {
+                    geometry = new THREE.BoxGeometry(22.5, 2, .025);
+                    material = new THREE.MeshPhongMaterial( {color: 0xffffff, side: THREE.DoubleSide} );
+                    box = new THREE.Mesh(geometry, material);
+                    box.rotation.y += 90*(Math.PI/180);
+                    box.position.set(17.5*xs[i], 1, 0);
+                    cancha.add(box);
+                }
+
+                var aumentoDelAngulo = 90, angulo = 0;
+                xs = [1, 1, -1, -1]
+                zs = [1, -1, -1, 1]
+                for(var i = 0; i < 4; i++)
+                {
+                    geometry = new THREE.CylinderGeometry(2.5, 2.5, 2, 32, 1, true, 0, 1.575);
+                    material = new THREE.MeshPhongMaterial( {color: 0xffffff, side: THREE.DoubleSide} );
+                    cylinder = new THREE.Mesh(geometry, material);
+                    cylinder.rotation.y += angulo*(Math.PI/180);
+                    cylinder.position.set(15*xs[i], 1, 11.25*zs[i]);
+                    angulo += aumentoDelAngulo;
+                    cancha.add(cylinder);
+                }
+                estadio.add(cancha);
+                //-----------------------Cancha---------------------------------------------------------------------------
+
+                //Gradas
+
+                geometry = new THREE.BoxGeometry(30, 2, 20);
+                material = new THREE.MeshPhongMaterial( {color: 0xd3d3d3, side: THREE.DoubleSide} );
+                box = new THREE.Mesh(geometry, material);
+                box.position.set(0, 1, -23.75);
+                gradas.add(box);
+
+                var altura = 1, aumentoDeAltura = 1, distancia = 0;
+                for(var i = 0; i < 20; i++)
+                {
+                    geometry = new THREE.BoxGeometry(30, altura, 1);
+                    material = new THREE.MeshPhongMaterial( {color: 0xd3d3d3, side: THREE.DoubleSide} );
+                    box = new THREE.Mesh(geometry, material);
+                    box.position.set(0, altura/2 + 2, -  14.25 - distancia);
+                    altura += aumentoDeAltura;
+                    distancia += aumentoDeAltura;
+                    gradas.add(box);
+                }
+
+                var aumentoDePosicion = 1, xPosicion = 0, yPosicion = 0;
+                aumentoDeAltura = 1;
+                for(var i = 0; i < 20; i++)
+                {
+                    for(var j = 0; j < 30; j++)
+                    {
+                        silla = hacerSillas();
+                        silla.rotation.y += 90 *(Math.PI/180);
+                        silla.scale.set(.1, .1, .1);
+                        silla.position.set(-12.5 + xPosicion, 4.7 + yPosicion, -9.55 - yPosicion);
+                        xPosicion += aumentoDePosicion;
+                        gradas.add(silla);
+                    }
+                    yPosicion += aumentoDeAltura;
+                    xPosicion = 0;
+                }
+
+                estadio.add(gradas);
+                //-------------------------Gradas------------------------------------------------------------------------
+
+                estadio.position.set(0, -14, 100);
+                // estadio.scale.set(2, 2, 2);
+                scene.add(estadio);
             }
 
 
@@ -1173,14 +1286,14 @@
                 gcocheContainer.scale.set(0.2, 0.2, 0.2);
                 gcocheContainer.position.set(0, -10, 10);
 
+                crearConstruccion(); 
 
                 var render = function () { 
                     requestAnimationFrame(render);  
                     rotarCarrusel();
                     subirYBajarCaballitos();  
                     rotarRueda();
-                    rotarTazas();     
-                    crearConstruccion();   
+                    rotarTazas();       
                     renderer.render(scene, camera); 
                 }; 
                 render();

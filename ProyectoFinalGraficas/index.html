@@ -1233,6 +1233,25 @@
                     gradas.add(box);
                 }
 
+                geometry = new THREE.BoxGeometry(20, 2, 22.5);
+                material = new THREE.MeshPhongMaterial( {color: 0xd3d3d3, side: THREE.DoubleSide} );
+                box = new THREE.Mesh(geometry, material);
+                box.position.set(27.5, 1, 0);
+                gradas.add(box);
+
+                altura = 1, aumentoDeAltura = 1, distancia = 0;
+                for(var i = 0; i < 20; i++)
+                {
+                    geometry = new THREE.BoxGeometry(1, altura, 22.5);
+                    material = new THREE.MeshPhongMaterial( {color: 0xd3d3d3, side: THREE.DoubleSide} );
+                    box = new THREE.Mesh(geometry, material);
+                    box.position.set(-  18 - distancia , altura/2 + 2, 0);
+                    altura += aumentoDeAltura;
+                    distancia += aumentoDeAltura;
+                    gradas.add(box);
+                }
+
+                //Sillas
                 var aumentoDePosicion = 1, xPosicion = 0, yPosicion = 0;
                 aumentoDeAltura = 1;
                 for(var i = 0; i < 20; i++)
@@ -1250,6 +1269,28 @@
                     xPosicion = 0;
                 }
 
+                var aumentoDePosicion = 1, xPosicion = 0, yPosicion = 0;
+                aumentoDeAltura = 1;
+                for(var i = 0; i < 20; i++)
+                {
+                    for(var j = 0; j < 22; j++)
+                    {
+                        silla = hacerSillas();
+                        silla.scale.set(.1, .1, .1);
+                        silla.rotation.y += 180 * (Math.PI/180);
+                        silla.position.set(-13.25 - yPosicion, 4.7 + yPosicion, 8.5 - xPosicion);
+                        xPosicion += aumentoDePosicion;
+                        gradas.add(silla);
+                    }
+                    yPosicion += aumentoDeAltura;
+                    xPosicion = 0;
+                }
+
+                var gradas2 = gradas.clone();
+                gradas2.rotation.y += 180 * (Math.PI/180);
+                gradas2.position.set(0, 0, 0);
+                    
+                estadio.add(gradas2);
                 estadio.add(gradas);
                 //-------------------------Gradas------------------------------------------------------------------------
 

@@ -139,7 +139,10 @@
                                 {name: 'texturaVentanas', url: 'windowTexture.jpg'},
                                 {name: 'texturaInteriores', url: 'interiorTextura.jpg'},
                                 {name: 'texturaAsientos', url: 'interiorAsientosTextura.jpg'},
-                                {name: 'texturasSillas', url: 'asientosMetalicos.jpg'}
+                                {name: 'texturasSillas', url: 'asientosMetalicos.jpg'},
+                                {name: 'texturasCuadrosAzules', url: 'cuadrosAzules.jpg'},
+                                {name: 'texturasAsientosAzules', url: 'azulAsiento.jpg'},
+                                {name: 'gris', url: 'gris.jpg'}
                                 ];
             
             cargarTexturas();
@@ -181,7 +184,10 @@
                         materialVentanas = new THREE.MeshBasicMaterial({map: texturas[6]});  
                         materialInteriores = new THREE.MeshBasicMaterial({map: texturas[7]});   
                         materialAsientos = new THREE.MeshBasicMaterial({map: texturas[8]}); 
-                        materialSillas = new THREE.MeshBasicMaterial({map: texturas[9]});                 
+                        materialSillas = new THREE.MeshBasicMaterial({map: texturas[9]});
+                        materialCuadrosAzules = new THREE.MeshBasicMaterial({map: texturas[10],  side: THREE.DoubleSide});  
+                        materialAzulAsiento = new THREE.MeshBasicMaterial({map: texturas[11],  side: THREE.DoubleSide});
+                        materialGris = new THREE.MeshBasicMaterial({map: texturas[12],  side: THREE.DoubleSide});                
                         pintarCarrusel();        
                         pintarCoche();            
                     },
@@ -975,8 +981,8 @@
             renderer.setSize(window.innerWidth, window.innerHeight); 
             document.body.appendChild(renderer.domElement); 
 
-            camera.position.z = cam_zpos; 
-            // camera.position.z = 100;
+            // camera.position.z = cam_zpos; 
+            camera.position.z = 100;
 
             // create some point lights
             var pointLight = new THREE.PointLight( 0xFFFFFF );
@@ -1057,7 +1063,7 @@
                 modifier.modify(asientoIzqGeom);
 
                 var material = new THREE.MeshPhongMaterial( {color: 0xd3d3d3, side: THREE.DoubleSide} );
-                var asientoIzq = new THREE.Mesh(asientoIzqGeom, materialSillas);
+                var asientoIzq = new THREE.Mesh(asientoIzqGeom, materialAzulAsiento);
                 asientoIzq.position.set(47, -15, -20);
                 var asiento = new THREE.Object3D();
                 asiento.add(asientoIzq);
@@ -1067,7 +1073,7 @@
                 var modifier = new THREE.SubdivisionModifier(2);
                 modifier.modify(asientoIzqGeom);
 
-                var asientoIzq = new THREE.Mesh(asientoIzqGeom, materialSillas);
+                var asientoIzq = new THREE.Mesh(asientoIzqGeom, materialAzulAsiento);
                 asientoIzq.position.set(47, -15, -20);
 
                 // Asiento 1 arriba 
@@ -1077,7 +1083,7 @@
                 var modifier = new THREE.SubdivisionModifier(2);
                 modifier.modify(asientoIzqArribaGeom);
 
-                var asientoIzqArriba = new THREE.Mesh(asientoIzqArribaGeom, materialSillas);
+                var asientoIzqArriba = new THREE.Mesh(asientoIzqArribaGeom, materialAzulAsiento);
                 asientoIzqArriba.position.set(50, -10, -20);
                 asiento.add(asientoIzqArriba);
                 return asiento;
@@ -1265,13 +1271,13 @@
                     {
                         geometry = new THREE.CylinderGeometry(radio, radio, altura, 32, 1, true, 0, 1.575);
                         material = new THREE.MeshPhongMaterial( {color: 0xd3d3d3, side: THREE.DoubleSide} );
-                        cylinder = new THREE.Mesh(geometry, material);
+                        cylinder = new THREE.Mesh(geometry, materialGris);
                         cylinder.rotation.y += angulo*(Math.PI/180);
                         cylinder.position.set(15*xs[j], altura/2, 11.25*zs[j]);
                         estadio.add(cylinder);
 
                         geometry = new THREE.RingGeometry(radio, radio + 1, 32, 1, segmento, 1.575);
-                        ring = new THREE.Mesh(geometry, material);
+                        ring = new THREE.Mesh(geometry, materialGris);
                         ring.rotation.x += 90*(Math.PI/180);
                         ring.position.set(15*xxs[j], altura, 11.25*zzs[j]);
                         estadio.add(ring);
@@ -1320,7 +1326,24 @@
                     xPosicion = 0;
                 }
 
-
+                // radio = 2.5, altura = 3, angulo = 0, aumentoDelAngulo, aumentoX = 0, aumentoZ = 0;
+                // for(var i = 0; i < 1; i++)
+                // {
+                //     cantidadSillas = (Math.PI*radio*2)/4;
+                //     aumentoDelAngulo += 90/cantidadSillas;
+                //     for(j = 0; j < cantidadSillas; j++)
+                //     {
+                //         silla = hacerSillas();
+                //         silla.rotation.y += (90 + angulo)*(Math.PI/180);
+                //         silla.position.set(-13.5 + aumentoX, 6, -9.55 + aumentoZ);
+                //         silla.scale.set(.1, .1, .1);
+                //         estadio.add(silla);
+                //         angulo += aumentoDelAngulo;
+                //     }
+                //     angulo = 0;
+                //     aumentoX += .03;
+                //     aumentoZ += .03;
+                // }
 
                 var gradas2 = gradas.clone();
                 gradas2.rotation.y += 180 * (Math.PI/180);
@@ -1329,6 +1352,42 @@
                 estadio.add(gradas2);
                 estadio.add(gradas);
                 //-------------------------Gradas------------------------------------------------------------------------
+
+                //Afuera
+
+                for(var i = 0; i < 4; i++)
+                {
+                    geometry = new THREE.CylinderGeometry(radio, radio, altura + 10, 32, 1, true, 0, 1.575);
+                    cylinder = new THREE.Mesh(geometry, materialCuadrosAzules);
+                    cylinder.rotation.y += angulo*(Math.PI/180);
+                    cylinder.position.set(15*xs[i], (altura + 10)/2, 15.25*zs[i]);
+                    estadio.add(cylinder);
+                    angulo += aumentoDelAngulo;
+                }
+
+                geometry = new THREE.PlaneGeometry(30, altura+10);
+                var plane = new THREE.Mesh(geometry, materialCuadrosAzules);
+                plane.position.set(0, (altura + 10)/2, 37.75);
+                estadio.add(plane);
+
+                geometry = new THREE.PlaneGeometry(30, altura+10);
+                var plane = new THREE.Mesh(geometry, materialCuadrosAzules);
+                plane.position.set(0, (altura + 10)/2, -37.75);
+                estadio.add(plane);
+
+                geometry = new THREE.PlaneGeometry(32, altura+10);
+                var plane = new THREE.Mesh(geometry, materialCuadrosAzules);
+                plane.rotation.y += 90*(Math.PI/180);
+                plane.position.set( 37.55, (altura + 10)/2, 0);
+                estadio.add(plane);
+
+                geometry = new THREE.PlaneGeometry(32, altura+10);
+                var plane = new THREE.Mesh(geometry, materialCuadrosAzules);
+                plane.rotation.y += 90*(Math.PI/180);
+                plane.position.set(-37.55, (altura + 10)/2, 0);
+                estadio.add(plane);
+
+                //------------------------Afuera-------------------------------------------------------------------------
 
                 estadio.position.set(0, -14, 100);
                 // estadio.scale.set(2, 2, 2);

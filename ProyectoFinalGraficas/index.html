@@ -976,6 +976,7 @@
             document.body.appendChild(renderer.domElement); 
 
             camera.position.z = cam_zpos; 
+            // camera.position.z = 100;
 
             // create some point lights
             var pointLight = new THREE.PointLight( 0xFFFFFF );
@@ -1178,6 +1179,7 @@
                 ring.position.set(0, .3, 0);
                 cancha.add(ring);
 
+                //Primeras bardas
                 for(var i = 0; i < 2; i++)
                 {
                     geometry = new THREE.BoxGeometry(30, 2, .025);
@@ -1210,6 +1212,7 @@
                     angulo += aumentoDelAngulo;
                     cancha.add(cylinder);
                 }
+                cancha.scale.set(.9, .9, .9);
                 estadio.add(cancha);
                 //-----------------------Cancha---------------------------------------------------------------------------
 
@@ -1251,6 +1254,37 @@
                     gradas.add(box);
                 }
 
+                //Gradas de las esquinas
+
+                var xxs = [1, -1, -1, 1];
+                var zzs = [1, 1, -1, -1];
+                var aumentoDelAngulo = 90, angulo = 0, radio = 2.5, altura = 3, aumentoDelRadio = 1, segmento = 0;
+                for(var i = 0; i < 20; i++)
+                {
+                    for(var j = 0; j < 4; j++)
+                    {
+                        geometry = new THREE.CylinderGeometry(radio, radio, altura, 32, 1, true, 0, 1.575);
+                        material = new THREE.MeshPhongMaterial( {color: 0xd3d3d3, side: THREE.DoubleSide} );
+                        cylinder = new THREE.Mesh(geometry, material);
+                        cylinder.rotation.y += angulo*(Math.PI/180);
+                        cylinder.position.set(15*xs[j], altura/2, 11.25*zs[j]);
+                        estadio.add(cylinder);
+
+                        geometry = new THREE.RingGeometry(radio, radio + 1, 32, 1, segmento, 1.575);
+                        ring = new THREE.Mesh(geometry, material);
+                        ring.rotation.x += 90*(Math.PI/180);
+                        ring.position.set(15*xxs[j], altura, 11.25*zzs[j]);
+                        estadio.add(ring);
+
+                        segmento += 1.575;
+                        angulo += aumentoDelAngulo;
+                    }
+                    angulo = 0;
+                    altura++;
+                    radio += aumentoDelRadio;
+                    segmento = 0;
+                }
+
                 //Sillas
                 var aumentoDePosicion = 1, xPosicion = 0, yPosicion = 0;
                 aumentoDeAltura = 1;
@@ -1286,10 +1320,12 @@
                     xPosicion = 0;
                 }
 
+
+
                 var gradas2 = gradas.clone();
                 gradas2.rotation.y += 180 * (Math.PI/180);
                 gradas2.position.set(0, 0, 0);
-                    
+                
                 estadio.add(gradas2);
                 estadio.add(gradas);
                 //-------------------------Gradas------------------------------------------------------------------------

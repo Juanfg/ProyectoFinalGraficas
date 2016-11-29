@@ -43,11 +43,6 @@
             var gllantasAdelanteContainer = new THREE.Object3D();
             var gLlantasAtras = new THREE.Object3D();
             var gllantasAtrasContainer = new THREE.Object3D();
-            var anguloCoche = 0;
-            var giraIzq = 0;
-            var anguloRotacion = 0;
-            var aumento = 0;
-
             var cam_zpos = 50.0;
             var angle = 0;
 
@@ -93,20 +88,22 @@
                         if(gllanta1Container.rotation.y < 0.6){
                             gllanta1Container.rotation.y += 0.1;
                             gllanta2Container.rotation.y += 0.1;
-                            giraIzq = 1;
-                            anguloCoche += 5;
-                            anguloRotacion += 0.009;
-                            aumento = 0;
                         }
                         break;
+                    case 71:  //G
+                        var angulo = gllanta1Container.rotation.y;
+                        gcocheContainer.rotation.y += angulo;
+                        angulo = gcocheContainer.rotation.y;
+                        gcocheContainer.position.x += Math.cos(angulo)*3;
+                        gcocheContainer.position.z -= Math.sin(angulo)*3;
+                        gllantasAtrasContainer.rotation.z += 0.1;
+                        gllanta1Container.rotation.z += 0.1;
+                        gllanta2Container.rotation.z += 0.1;
+                    break;
                     case 72:  //H  
                         if(gllanta1Container.rotation.y > -0.6){
                             gllanta1Container.rotation.y -= 0.1;
                             gllanta2Container.rotation.y -= 0.1;
-                            giraIzq = 0;
-                            anguloCoche -= 5;
-                            anguloRotacion -= 0.009;
-                            aumento = 0;
                         }
                     break;
                     case 74:  //J  
@@ -126,22 +123,14 @@
                         camera.position.y-=5;
                         break;
                     case 84:  //T
-                        if(gllanta1Container.rotation.y == 0 && aumento == 0){
-                            anguloCoche -= 90;
-                            aumento = 1;
-                        }
-                        gcocheContainer.position.x += Math.sin(anguloCoche *(Math.PI/180))*0.5;
-                        gcocheContainer.position.z += Math.cos(anguloCoche *(Math.PI/180))*0.5;
-                        if(giraIzq == 0){
-                            gcocheContainer.rotation.y += anguloRotacion;
-                        }
-                        else{
-                            gcocheContainer.rotation.y += anguloRotacion;
-                        }
+                        var angulo = gllanta1Container.rotation.y;
+                        gcocheContainer.rotation.y += angulo;
+                        angulo = gcocheContainer.rotation.y;
+                        gcocheContainer.position.x += Math.cos(angulo)*-3;
+                        gcocheContainer.position.z -= Math.sin(angulo)*-3;
                         gllantasAtrasContainer.rotation.z += 0.1;
                         gllanta1Container.rotation.z += 0.1;
                         gllanta2Container.rotation.z += 0.1;
-
                     break;
                     case 85:  //U
                         if(gPuertaIzqContainer.rotation.y > -1.5000000000000002){
@@ -1484,6 +1473,7 @@
                 estadio.position.set(0, -14, 100);
                 // estadio.scale.set(2, 2, 2);
                 scene.add(estadio);
+                return estadio;
             }
 
 
@@ -1494,8 +1484,7 @@
                 var suelo = new THREE.Mesh( geometry, material );
                 suelo.position.set(0, -15, 0);
                 scene.add(suelo);
-
-                //Rueda
+                
                 rueda = hacerRueda();
                 rueda.position.set(0, 0, -15);
                 patas.position.set(0, 0, -15);
@@ -1514,7 +1503,27 @@
                 gcocheContainer.scale.set(0.2, 0.2, 0.2);
                 gcocheContainer.position.set(0, -10, 10);
 
-                crearConstruccion(); 
+                estadio = crearConstruccion(); 
+
+                renderer.shadowMapEnabled = true;
+                renderer.shadowMapType = THREE.PCFSoftShadowMap;                        
+                pointLight.castShadow = true;
+                pointLight.shadowDarkness = 0.8;
+                pointLight.shadowMapWidth = 5;
+                pointLight.shadowMapHeight = 5;                        
+                
+                rueda.traverse( function( node ) {
+                if( node.material ) {
+                    node.castShadow = true;
+                    node.receiveShadow = false;
+                }
+                });                        
+                suelo.traverse( function( node ) {
+                    if( node.material ) {
+                        node.castShadow = false;
+                        node.receiveShadow = true;
+                    }
+                });
 
                 var render = function () { 
                     requestAnimationFrame(render);  

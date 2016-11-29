@@ -35,6 +35,18 @@
             var gCajuela = new THREE.Object3D();
             var gcajuelaContainer = new THREE.Object3D();
             var gcofreContainer = new THREE.Object3D();
+            var gllanta1 = new THREE.Object3D();
+            var gllanta1Container = new THREE.Object3D();
+            var gllanta2 = new THREE.Object3D();
+            var gllanta2Container = new THREE.Object3D();
+            var gLlantasAdelante = new THREE.Object3D();
+            var gllantasAdelanteContainer = new THREE.Object3D();
+            var gLlantasAtras = new THREE.Object3D();
+            var gllantasAtrasContainer = new THREE.Object3D();
+            var anguloCoche = 0;
+            var giraIzq = 0;
+            var anguloRotacion = 0;
+            var aumento = 0;
 
             var cam_zpos = 50.0;
             var angle = 0;
@@ -77,6 +89,26 @@
                         camera.position.x -= (5*Math.sin( (angle*(Math.PI/180))  ));
                         angle+=90;
                         break;
+                    case 70:  //F  
+                        if(gllanta1Container.rotation.y < 0.6){
+                            gllanta1Container.rotation.y += 0.1;
+                            gllanta2Container.rotation.y += 0.1;
+                            giraIzq = 1;
+                            anguloCoche += 5;
+                            anguloRotacion += 0.009;
+                            aumento = 0;
+                        }
+                        break;
+                    case 72:  //H  
+                        if(gllanta1Container.rotation.y > -0.6){
+                            gllanta1Container.rotation.y -= 0.1;
+                            gllanta2Container.rotation.y -= 0.1;
+                            giraIzq = 0;
+                            anguloCoche -= 5;
+                            anguloRotacion -= 0.009;
+                            aumento = 0;
+                        }
+                    break;
                     case 74:  //J  
                         if(gPuertaIzqContainer.rotation.y < -0.1){
                                 gPuertaIzqContainer.rotation.y += 0.1;
@@ -93,6 +125,24 @@
                     case 83:  //S      
                         camera.position.y-=5;
                         break;
+                    case 84:  //T
+                        if(gllanta1Container.rotation.y == 0 && aumento == 0){
+                            anguloCoche -= 90;
+                            aumento = 1;
+                        }
+                        gcocheContainer.position.x += Math.sin(anguloCoche *(Math.PI/180))*0.5;
+                        gcocheContainer.position.z += Math.cos(anguloCoche *(Math.PI/180))*0.5;
+                        if(giraIzq == 0){
+                            gcocheContainer.rotation.y += anguloRotacion;
+                        }
+                        else{
+                            gcocheContainer.rotation.y += anguloRotacion;
+                        }
+                        gllantasAtrasContainer.rotation.z += 0.1;
+                        gllanta1Container.rotation.z += 0.1;
+                        gllanta2Container.rotation.z += 0.1;
+
+                    break;
                     case 85:  //U
                         if(gPuertaIzqContainer.rotation.y > -1.5000000000000002){
                             gPuertaIzqContainer.rotation.y -= 0.1;
@@ -425,13 +475,13 @@
             
            function pintarCoche(){
 
-                // Llanta 1 izq atras hoyo interior
+                // Llanta 1 derecha adelante hoyo interior
                 var llanta1HoyoInterior = new THREE.Mesh(new THREE.CylinderGeometry(1.7, 1.7, 4, 20, 4));
                 llanta1HoyoInterior.rotation.set(1.6, 0, 0);
                 llanta1HoyoInterior.position.set(32, -19, -33);
                 var llanta1HoyoInterior_bsp = new ThreeBSP(llanta1HoyoInterior);
 
-                // Llanta 1 izq atras
+                // Llanta 1 derecha adelante
                 var llanta1 = new THREE.Mesh(new THREE.CylinderGeometry(4, 4, 4, 20, 4));
                 llanta1.rotation.set(1.6, 0, 0);
                 llanta1.position.set(32, -19, -33);
@@ -440,15 +490,15 @@
                 var subtract_bsp = llanta1_bsp.subtract(llanta1HoyoInterior_bsp);
                 var result = subtract_bsp.toMesh(materialLlantas);
                 result.geometry.computeVertexNormals();
-                gcocheContainer.add(result);
+                gllanta1.add(result);
 
-                // Llanta 2 izq adelante hoyo interior
+                // Llanta 2 izquierda adelante hoyo interior
                 var llanta2HoyoInterior = new THREE.Mesh(new THREE.CylinderGeometry(1.7, 1.7, 4, 20, 4));
                 llanta2HoyoInterior.rotation.set(1.6, 0, 0);
                 llanta2HoyoInterior.position.set(32, -19, -17);
                 var llanta2HoyoInterior_bsp = new ThreeBSP(llanta2HoyoInterior);
 
-                // Llanta 2 izq adelante
+                // Llanta 2 izquierda adelante
                 var llanta2 = new THREE.Mesh(new THREE.CylinderGeometry(4, 4, 4, 20, 4));
                 llanta2.rotation.set(1.6, 0, 0);
                 llanta2.position.set(32, -19, -17);
@@ -457,43 +507,79 @@
                 var subtract2_bsp = llanta2_bsp.subtract(llanta2HoyoInterior_bsp);
                 var result2 = subtract2_bsp.toMesh(materialLlantas);
                 result2.geometry.computeVertexNormals();
-                gcocheContainer.add(result2);
+                gllanta2.add(result2);
 
-                // Llanta 3 der hoyo interior
+                // Llanta 3 izquierda atras hoyo interior
                 var llanta3HoyoInterior = new THREE.Mesh(new THREE.CylinderGeometry(1.7, 1.7, 4, 20, 4));
                 llanta3HoyoInterior.rotation.set(1.6, 0, 0);
-                llanta3HoyoInterior.position.set(59, -19, -33);
+                llanta3HoyoInterior.position.set(59, -19, -17);
                 var llanta3HoyoInterior_bsp = new ThreeBSP(llanta3HoyoInterior);
 
-                // Llanta 3 der atras
+                // Llanta 3 izquierda atras
                 var llanta3 = new THREE.Mesh(new THREE.CylinderGeometry(4, 4, 4, 20, 4));
                 llanta3.rotation.set(1.6, 0, 0);
-                llanta3.position.set(59, -19, -33);
+                llanta3.position.set(59, -19, -17);
                 var llanta3_bsp = new ThreeBSP(llanta3);
 
                 var subtract_bsp = llanta3_bsp.subtract(llanta3HoyoInterior_bsp);
                 var result = subtract_bsp.toMesh(materialLlantas);
                 result.geometry.computeVertexNormals();
-                gcocheContainer.add(result);
+                gLlantasAtras.add(result);
 
-                // Llanta 4 der hoyo interior
+                // Llanta 4 derecha atras hoyo interior
                 var llanta4HoyoInterior = new THREE.Mesh(new THREE.CylinderGeometry(1.7, 1.7, 4, 20, 4));
                 llanta4HoyoInterior.rotation.set(1.6, 0, 0);
-                llanta4HoyoInterior.position.set(59, -19, -17);
+                llanta4HoyoInterior.position.set(59, -19, -33);
                 var llanta4HoyoInterior_bsp = new ThreeBSP(llanta4HoyoInterior);
 
-                // Llanta 4 der adelante
+                // Llanta 4 derecha atras
                 var llanta4 = new THREE.Mesh(new THREE.CylinderGeometry(4, 4, 4, 20, 4));
                 llanta4.rotation.set(1.6, 0, 0);
-                llanta4.position.set(59, -19, -17);
+                llanta4.position.set(59, -19, -33);
                 var llanta4_bsp = new ThreeBSP(llanta4);
 
 
                 var subtract_bsp = llanta4_bsp.subtract(llanta4HoyoInterior_bsp);
                 var result = subtract_bsp.toMesh(materialLlantas);
                 result.geometry.computeVertexNormals();
-                gcocheContainer.add(result);
+                gLlantasAtras.add(result);
 
+                gllanta1.position.y += 19;
+                gllanta1.position.x -= 32;
+                gllanta1.position.z += 33;
+
+                gllanta1Container.add(gllanta1);
+
+                gllanta1Container.position.y -= 19;
+                gllanta1Container.position.x += 32;
+                gllanta1Container.position.z -= 33;
+
+                gllanta2.position.y += 19;
+                gllanta2.position.x -= 32;
+                gllanta2.position.z += 17;
+
+
+                gllanta2Container.add(gllanta2);
+
+                gllanta2Container.position.y -= 19;
+                gllanta2Container.position.x += 32;
+                gllanta2Container.position.z -= 17;
+
+
+                gcoche.add(gllanta1Container);
+                gcoche.add(gllanta2Container);
+
+                gLlantasAtras.position.y += 19;
+                gLlantasAtras.position.x -= 59;
+                gLlantasAtras.position.z -= 16;
+
+                gllantasAtrasContainer.add(gLlantasAtras);
+
+                gllantasAtrasContainer.position.y -= 19;
+                gllantasAtrasContainer.position.x += 59;
+                gllantasAtrasContainer.position.z += 16;
+
+                gcoche.add(gllantasAtrasContainer);
 
                 // parte de enmedio
                 var cocheEnmedio = new THREE.Mesh(new THREE.BoxGeometry(17, 20, 20, 1, 1, 1));
@@ -515,7 +601,7 @@
                 var subtract_bsp = cocheEnmedio_bsp.subtract(union_bsp);
                 var result = subtract_bsp.toMesh(materialCoche);
                 result.geometry.computeVertexNormals();
-                gcocheContainer.add(result);
+                gcoche.add(result);
 
                 // interiores
 
@@ -527,7 +613,7 @@
                 var subtract_bsp = cocheInteriores_bsp.subtract(cocheEnmedioHoyoFrente_bsp);
                 var result = subtract_bsp.toMesh(materialInteriores);
                 result.geometry.computeVertexNormals();
-                gcocheContainer.add(result);
+                gcoche.add(result);
 
                 // interiores der
                 var cocheInterioresDer = new THREE.Mesh(new THREE.BoxGeometry(0.2, 17, 19, 1, 1, 1), materialInteriores);
@@ -537,19 +623,17 @@
                 var subtract_bsp = cocheInterioresDer_bsp.subtract(cocheEnmedioHoyoFrente_bsp);
                 var result = subtract_bsp.toMesh(materialInteriores);
                 result.geometry.computeVertexNormals();
-                gcocheContainer.add(result);
-
+                gcoche.add(result);
 
                 // interiores abajo
                 var cocheInterioresAbajo = new THREE.Mesh(new THREE.BoxGeometry(14, 0.2, 19, 1, 1, 1), materialInteriores);
                 cocheInterioresAbajo.position.set(45.5, -16.5, -25);
-                gcocheContainer.add(cocheInterioresAbajo);
+                gcoche.add(cocheInterioresAbajo);
 
                 // interiores arriba
                 var cocheInterioresArriba = new THREE.Mesh(new THREE.BoxGeometry(14, 0.2, 19, 1, 1, 1), materialInteriores);
                 cocheInterioresArriba.position.set(45.5, 0.5, -25);
-                gcocheContainer.add(cocheInterioresArriba);
-
+                gcoche.add(cocheInterioresArriba);
 
                 // puerta izq
                 var puertaIzq = new THREE.Mesh(new THREE.BoxGeometry(16, 9, 2, 1, 1, 1), materialCoche);
@@ -576,7 +660,7 @@
                 gPuertaIzqContainer.position.x += 38;
                 gPuertaIzqContainer.position.z -= 15;
 
-                gcocheContainer.add(gPuertaIzqContainer);
+                gcoche.add(gPuertaIzqContainer);
 
                 // puerta der
                 var puertaDer = new THREE.Mesh(new THREE.BoxGeometry(16, 9, 2, 1, 1, 1), materialCoche);
@@ -603,7 +687,7 @@
                 gPuertaDerContainer.position.x += 38;
                 gPuertaDerContainer.position.z -= 34;
 
-                gcocheContainer.add(gPuertaDerContainer);
+                gcoche.add(gPuertaDerContainer);
 
 
                 // Asiento 1 abajo
@@ -614,7 +698,7 @@
 
                 var asientoIzq = new THREE.Mesh(asientoIzqGeom, materialAsientos);
                 asientoIzq.position.set(47, -15, -20);
-                gcocheContainer.add(asientoIzq);
+                gcoche.add(asientoIzq);
 
                 // Asiento 1 arriba 
 
@@ -625,7 +709,7 @@
 
                 var asientoIzqArriba = new THREE.Mesh(asientoIzqArribaGeom, materialAsientos);
                 asientoIzqArriba.position.set(50, -10, -20);
-                gcocheContainer.add(asientoIzqArriba);
+                gcoche.add(asientoIzqArriba);
 
                 // Asiento 2 abajo
                 var asientoDerGeom = new THREE.BoxGeometry(10, 4, 10, 1, 1, 1);
@@ -633,7 +717,7 @@
                 var asientoDer = new THREE.Mesh(asientoDerGeom, materialAsientos);
                 modifier.modify(asientoDerGeom);
                 asientoDer.position.set(47, -15, -30);
-                gcocheContainer.add(asientoDer);
+                gcoche.add(asientoDer);
 
                 // Asiento 2 arriba 
 
@@ -644,17 +728,17 @@
 
                 var asientoDerArriba = new THREE.Mesh(asientoDerArribaGeom, materialAsientos);
                 asientoDerArriba.position.set(50, -10, -30);
-                gcocheContainer.add(asientoDerArriba);
+                gcoche.add(asientoDerArriba);
 
                 // parabrisas
                 var parabrisas = new THREE.Mesh(new THREE.BoxGeometry(1, 8, 16, 1, 1, 1), materialVentanas);
                 parabrisas.position.set(37.5, -4, -25);
-                gcocheContainer.add(parabrisas);
+                gcoche.add(parabrisas);
 
                 // parabrisasAtras
                 var parabrisasAtras = new THREE.Mesh(new THREE.BoxGeometry(1, 8, 16, 1, 1, 1), materialVentanas);
                 parabrisasAtras.position.set(53.5, -4, -25);
-                gcocheContainer.add(parabrisasAtras);
+                gcoche.add(parabrisasAtras);
 
                 // parte de atras llantas
                 var cocheParteAtras = new THREE.Mesh(new THREE.CubeGeometry(12, 9, 20, 1, 1, 1));
@@ -662,13 +746,13 @@
                 var cocheParteAtras_bsp = new ThreeBSP(cocheParteAtras);
 
                 // Llanta hoyo
-                var llantaHoyoAtras = new THREE.Mesh(new THREE.CylinderGeometry(4.3, 4.3, 22, 20, 4));
+                var llantaHoyoAtras = new THREE.Mesh(new THREE.CylinderGeometry(4.5, 4.5, 22, 20, 4));
                 llantaHoyoAtras.rotation.set(1.6, 0, 0);
                 llantaHoyoAtras.position.set(59, -18, -25);
                 var llantaHoyoAtras_bsp = new ThreeBSP(llantaHoyoAtras);
 
                 // Cajuela hoyo
-                var cajuelaHoyo = new THREE.Mesh(new THREE.BoxGeometry(9, 8, 15, 1, 1, 1));
+                var cajuelaHoyo = new THREE.Mesh(new THREE.BoxGeometry(9, 6, 15, 1, 1, 1));
                 cajuelaHoyo.position.set(61.5, -10, -25);
                 var cajuelaHoyo_bsp = new ThreeBSP(cajuelaHoyo);
 
@@ -677,22 +761,22 @@
                 var subtract_bsp = cocheParteAtras_bsp.subtract(union_bsp);
                 var result = subtract_bsp.toMesh(materialCoche);
                 result.geometry.computeVertexNormals();
-                gcocheContainer.add(result);
+                gcoche.add(result);
 
                 // Cajuela hoyo Interiores
-                var cajuelaHoyoInteriores = new THREE.Mesh(new THREE.BoxGeometry(8, 7, 14, 1, 1, 1));
+                var cajuelaHoyoInteriores = new THREE.Mesh(new THREE.BoxGeometry(8.7, 5, 14, 1, 1, 1));
                 cajuelaHoyoInteriores.position.set(61.5, -9, -25);
                 var cajuelaHoyoInteriores_bsp = new ThreeBSP(cajuelaHoyoInteriores);
 
                 // Cajuela interiores
-                var cajuelaInteriores = new THREE.Mesh(new THREE.BoxGeometry(8.5, 6, 15, 1, 1, 1));
-                cajuelaInteriores.position.set(61, -13, -25);
+                var cajuelaInteriores = new THREE.Mesh(new THREE.BoxGeometry(8.5, 3, 15, 1, 1, 1));
+                cajuelaInteriores.position.set(61, -11.5, -25);
                 var cajuelaInteriores_bsp = new ThreeBSP(cajuelaInteriores);
 
                 var subtract_bsp = cajuelaInteriores_bsp.subtract(cajuelaHoyoInteriores_bsp);
                 var result = subtract_bsp.toMesh(materialInteriores);
                 result.geometry.computeVertexNormals();
-                gcocheContainer.add(result);
+                gcoche.add(result);
 
                 // Cajuela caparazon arriba
                 var cajuelaCaparazon = new THREE.Mesh(new THREE.BoxGeometry(8.5, 1, 15, 1, 1, 1), materialCoche);
@@ -704,7 +788,6 @@
                 cajuelaCaparazonAbajo.position.set(65.5, -12, -25);
                 gCajuela.add(cajuelaCaparazonAbajo);
 
-
                 gCajuela.position.y += 11;
                 gCajuela.position.x -= 57;
                 gCajuela.position.z += 34;
@@ -715,7 +798,7 @@
                 gcajuelaContainer.position.x += 57;
                 gcajuelaContainer.position.z -= 34;
 
-                gcocheContainer.add(gcajuelaContainer);
+                gcoche.add(gcajuelaContainer);
 
                 // parte de adelante llantas
                 var cocheParteAdelante = new THREE.Mesh(new THREE.CubeGeometry(16, 9, 20, 1, 1, 1));
@@ -723,7 +806,7 @@
                 var cocheParteAdelante_bsp = new ThreeBSP(cocheParteAdelante);
 
                 // Llanta hoyo
-                var llantaHoyo = new THREE.Mesh(new THREE.CylinderGeometry(4.3, 4.3, 22, 20, 4));
+                var llantaHoyo = new THREE.Mesh(new THREE.CylinderGeometry(4.5, 4.5, 22, 20, 4));
                 llantaHoyo.rotation.set(1.6, 0, 0);
                 llantaHoyo.position.set(32, -18, -25);
                 var llantaHoyo_bsp = new ThreeBSP(llantaHoyo);
@@ -737,27 +820,26 @@
 
                 var subtract_bsp = cocheParteAdelante_bsp.subtract(union_bsp);
                 var result = subtract_bsp.toMesh(materialCoche);
-                gcocheContainer.add(result);
+                gcoche.add(result);
 
                 // cofre hoyo Interiores
                 var cofreHoyoInteriores = new THREE.Mesh(new THREE.BoxGeometry(13, 3.5, 14, 1, 1, 1), materialVentanas);
                 cofreHoyoInteriores.position.set(29.5, -11, -25);
                 var cofreHoyoInteriores_bsp = new ThreeBSP(cofreHoyoInteriores);
-                //scene.add(cofreHoyoInteriores);
 
                 //cofre interiores
-                var cofreInteriores = new THREE.Mesh(new THREE.BoxGeometry(14, 4.5, 15, 1, 1, 1));
-                cofreInteriores.position.set(29.5, -12, -25);
+                var cofreInteriores = new THREE.Mesh(new THREE.BoxGeometry(14, 4, 15, 1, 1, 1));
+                cofreInteriores.position.set(29.5, -11.5, -25);
                 var cofreInteriores_bsp = new ThreeBSP(cofreInteriores);
 
                 var subtract_bsp = cofreInteriores_bsp.subtract(cofreHoyoInteriores_bsp);
                 var result = subtract_bsp.toMesh(materialInteriores);
                 result.geometry.computeVertexNormals();
-                gcocheContainer.add(result);
+                gcoche.add(result);
 
                 //cofre tapa
                 var cofreTapa = new THREE.Mesh(new THREE.BoxGeometry(15, 0.5, 16, 1, 1, 1), materialCoche);
-                cofreTapa.position.set(29, -9.5, -24.5);
+                cofreTapa.position.set(29.4, -9.5, -24.5);
 
                 cofreTapa.position.y += 11;
                 cofreTapa.position.x -= 36;
@@ -769,7 +851,17 @@
                 gcofreContainer.position.x += 36;
                 gcofreContainer.position.z -= 34;
 
-                gcocheContainer.add(gcofreContainer);
+                gcoche.add(gcofreContainer);
+
+                gcoche.position.y += 11;
+                gcoche.position.x -= 45;
+                gcoche.position.z += 25;
+
+                gcocheContainer.add(gcoche);
+
+                gcocheContainer.position.y -= 11;
+                gcocheContainer.position.x += 45;
+                gcocheContainer.position.z -= 25;
 
                 scene.add(gcocheContainer);
 

@@ -189,7 +189,10 @@
                                 {name: 'texturaVentanas', url: 'windowTexture.jpg'},
                                 {name: 'texturaInteriores', url: 'interiorTextura.jpg'},
                                 {name: 'texturaAsientos', url: 'interiorAsientosTextura.jpg'},
-                                {name: 'texturasSillas', url: 'asientosMetalicos.jpg'}
+                                {name: 'texturasSillas', url: 'asientosMetalicos.jpg'},
+                                {name: 'texturasCuadrosAzules', url: 'cuadrosAzules.jpg'},
+                                {name: 'texturasAsientosAzules', url: 'azulAsiento.jpg'},
+                                {name: 'gris', url: 'gris.jpg'}
                                 ];
             
             cargarTexturas();
@@ -231,7 +234,10 @@
                         materialVentanas = new THREE.MeshBasicMaterial({map: texturas[6]});  
                         materialInteriores = new THREE.MeshBasicMaterial({map: texturas[7]});   
                         materialAsientos = new THREE.MeshBasicMaterial({map: texturas[8]}); 
-                        materialSillas = new THREE.MeshBasicMaterial({map: texturas[9]});                 
+                        materialSillas = new THREE.MeshBasicMaterial({map: texturas[9]});
+                        materialCuadrosAzules = new THREE.MeshBasicMaterial({map: texturas[10],  side: THREE.DoubleSide});  
+                        materialAzulAsiento = new THREE.MeshBasicMaterial({map: texturas[11],  side: THREE.DoubleSide});
+                        materialGris = new THREE.MeshBasicMaterial({map: texturas[12],  side: THREE.DoubleSide});                
                         pintarCarrusel();        
                         pintarCoche();            
                     },
@@ -1067,7 +1073,8 @@
             renderer.setSize(window.innerWidth, window.innerHeight); 
             document.body.appendChild(renderer.domElement); 
 
-            camera.position.z = cam_zpos; 
+            // camera.position.z = cam_zpos; 
+            camera.position.z = 100;
 
             // create some point lights
             var pointLight = new THREE.PointLight( 0xFFFFFF );
@@ -1148,7 +1155,7 @@
                 modifier.modify(asientoIzqGeom);
 
                 var material = new THREE.MeshPhongMaterial( {color: 0xd3d3d3, side: THREE.DoubleSide} );
-                var asientoIzq = new THREE.Mesh(asientoIzqGeom, materialSillas);
+                var asientoIzq = new THREE.Mesh(asientoIzqGeom, materialAzulAsiento);
                 asientoIzq.position.set(47, -15, -20);
                 var asiento = new THREE.Object3D();
                 asiento.add(asientoIzq);
@@ -1158,7 +1165,7 @@
                 var modifier = new THREE.SubdivisionModifier(2);
                 modifier.modify(asientoIzqGeom);
 
-                var asientoIzq = new THREE.Mesh(asientoIzqGeom, materialSillas);
+                var asientoIzq = new THREE.Mesh(asientoIzqGeom, materialAzulAsiento);
                 asientoIzq.position.set(47, -15, -20);
 
                 // Asiento 1 arriba 
@@ -1168,7 +1175,7 @@
                 var modifier = new THREE.SubdivisionModifier(2);
                 modifier.modify(asientoIzqArribaGeom);
 
-                var asientoIzqArriba = new THREE.Mesh(asientoIzqArribaGeom, materialSillas);
+                var asientoIzqArriba = new THREE.Mesh(asientoIzqArribaGeom, materialAzulAsiento);
                 asientoIzqArriba.position.set(50, -10, -20);
                 asiento.add(asientoIzqArriba);
                 return asiento;
@@ -1270,6 +1277,7 @@
                 ring.position.set(0, .3, 0);
                 cancha.add(ring);
 
+                //Primeras bardas
                 for(var i = 0; i < 2; i++)
                 {
                     geometry = new THREE.BoxGeometry(30, 2, .025);
@@ -1302,6 +1310,7 @@
                     angulo += aumentoDelAngulo;
                     cancha.add(cylinder);
                 }
+                cancha.scale.set(.9, .9, .9);
                 estadio.add(cancha);
                 //-----------------------Cancha---------------------------------------------------------------------------
 
@@ -1325,6 +1334,56 @@
                     gradas.add(box);
                 }
 
+                geometry = new THREE.BoxGeometry(20, 2, 22.5);
+                material = new THREE.MeshPhongMaterial( {color: 0xd3d3d3, side: THREE.DoubleSide} );
+                box = new THREE.Mesh(geometry, material);
+                box.position.set(27.5, 1, 0);
+                gradas.add(box);
+
+                altura = 1, aumentoDeAltura = 1, distancia = 0;
+                for(var i = 0; i < 20; i++)
+                {
+                    geometry = new THREE.BoxGeometry(1, altura, 22.5);
+                    material = new THREE.MeshPhongMaterial( {color: 0xd3d3d3, side: THREE.DoubleSide} );
+                    box = new THREE.Mesh(geometry, material);
+                    box.position.set(-  18 - distancia , altura/2 + 2, 0);
+                    altura += aumentoDeAltura;
+                    distancia += aumentoDeAltura;
+                    gradas.add(box);
+                }
+
+                //Gradas de las esquinas
+
+                var xxs = [1, -1, -1, 1];
+                var zzs = [1, 1, -1, -1];
+                var aumentoDelAngulo = 90, angulo = 0, radio = 2.5, altura = 3, aumentoDelRadio = 1, segmento = 0;
+                for(var i = 0; i < 20; i++)
+                {
+                    for(var j = 0; j < 4; j++)
+                    {
+                        geometry = new THREE.CylinderGeometry(radio, radio, altura, 32, 1, true, 0, 1.575);
+                        material = new THREE.MeshPhongMaterial( {color: 0xd3d3d3, side: THREE.DoubleSide} );
+                        cylinder = new THREE.Mesh(geometry, materialGris);
+                        cylinder.rotation.y += angulo*(Math.PI/180);
+                        cylinder.position.set(15*xs[j], altura/2, 11.25*zs[j]);
+                        estadio.add(cylinder);
+
+                        geometry = new THREE.RingGeometry(radio, radio + 1, 32, 1, segmento, 1.575);
+                        ring = new THREE.Mesh(geometry, materialGris);
+                        ring.rotation.x += 90*(Math.PI/180);
+                        ring.position.set(15*xxs[j], altura, 11.25*zzs[j]);
+                        estadio.add(ring);
+
+                        segmento += 1.575;
+                        angulo += aumentoDelAngulo;
+                    }
+                    angulo = 0;
+                    altura++;
+                    radio += aumentoDelRadio;
+                    segmento = 0;
+                }
+
+                //Sillas
                 var aumentoDePosicion = 1, xPosicion = 0, yPosicion = 0;
                 aumentoDeAltura = 1;
                 for(var i = 0; i < 20; i++)
@@ -1342,8 +1401,85 @@
                     xPosicion = 0;
                 }
 
+                var aumentoDePosicion = 1, xPosicion = 0, yPosicion = 0;
+                aumentoDeAltura = 1;
+                for(var i = 0; i < 20; i++)
+                {
+                    for(var j = 0; j < 22; j++)
+                    {
+                        silla = hacerSillas();
+                        silla.scale.set(.1, .1, .1);
+                        silla.rotation.y += 180 * (Math.PI/180);
+                        silla.position.set(-13.25 - yPosicion, 4.7 + yPosicion, 8.5 - xPosicion);
+                        xPosicion += aumentoDePosicion;
+                        gradas.add(silla);
+                    }
+                    yPosicion += aumentoDeAltura;
+                    xPosicion = 0;
+                }
+
+                // radio = 2.5, altura = 3, angulo = 0, aumentoDelAngulo, aumentoX = 0, aumentoZ = 0;
+                // for(var i = 0; i < 1; i++)
+                // {
+                //     cantidadSillas = (Math.PI*radio*2)/4;
+                //     aumentoDelAngulo += 90/cantidadSillas;
+                //     for(j = 0; j < cantidadSillas; j++)
+                //     {
+                //         silla = hacerSillas();
+                //         silla.rotation.y += (90 + angulo)*(Math.PI/180);
+                //         silla.position.set(-13.5 + aumentoX, 6, -9.55 + aumentoZ);
+                //         silla.scale.set(.1, .1, .1);
+                //         estadio.add(silla);
+                //         angulo += aumentoDelAngulo;
+                //     }
+                //     angulo = 0;
+                //     aumentoX += .03;
+                //     aumentoZ += .03;
+                // }
+
+                var gradas2 = gradas.clone();
+                gradas2.rotation.y += 180 * (Math.PI/180);
+                gradas2.position.set(0, 0, 0);
+                
+                estadio.add(gradas2);
                 estadio.add(gradas);
                 //-------------------------Gradas------------------------------------------------------------------------
+
+                //Afuera
+
+                for(var i = 0; i < 4; i++)
+                {
+                    geometry = new THREE.CylinderGeometry(radio, radio, altura + 10, 32, 1, true, 0, 1.575);
+                    cylinder = new THREE.Mesh(geometry, materialCuadrosAzules);
+                    cylinder.rotation.y += angulo*(Math.PI/180);
+                    cylinder.position.set(15*xs[i], (altura + 10)/2, 15.25*zs[i]);
+                    estadio.add(cylinder);
+                    angulo += aumentoDelAngulo;
+                }
+
+                geometry = new THREE.PlaneGeometry(30, altura+10);
+                var plane = new THREE.Mesh(geometry, materialCuadrosAzules);
+                plane.position.set(0, (altura + 10)/2, 37.75);
+                estadio.add(plane);
+
+                geometry = new THREE.PlaneGeometry(30, altura+10);
+                var plane = new THREE.Mesh(geometry, materialCuadrosAzules);
+                plane.position.set(0, (altura + 10)/2, -37.75);
+                estadio.add(plane);
+
+                geometry = new THREE.PlaneGeometry(32, altura+10);
+                var plane = new THREE.Mesh(geometry, materialCuadrosAzules);
+                plane.rotation.y += 90*(Math.PI/180);
+                plane.position.set( 37.55, (altura + 10)/2, 0);
+                estadio.add(plane);
+
+                geometry = new THREE.PlaneGeometry(32, altura+10);
+                var plane = new THREE.Mesh(geometry, materialCuadrosAzules);
+                plane.rotation.y += 90*(Math.PI/180);
+                plane.position.set(-37.55, (altura + 10)/2, 0);
+                estadio.add(plane);
+
+                //------------------------Afuera-------------------------------------------------------------------------
 
                 estadio.position.set(0, -14, 100);
                 // estadio.scale.set(2, 2, 2);

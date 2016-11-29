@@ -1256,6 +1256,64 @@
                 return posteMesh;
             }
 
+            function hacerPorteria()
+            {
+                var poste = new THREE.Geometry();
+
+                poste.vertices.push(new THREE.Vector3(0, 0, 0));
+                poste.vertices.push(new THREE.Vector3(1, 0, 0));
+                poste.vertices.push(new THREE.Vector3(0, 0, 1));
+                poste.vertices.push(new THREE.Vector3(1, 0, 1));
+
+                poste.vertices.push(new THREE.Vector3(0, 7, 0));
+                poste.vertices.push(new THREE.Vector3(1, 7, 0));
+                poste.vertices.push(new THREE.Vector3(0, 7, 1));
+                poste.vertices.push(new THREE.Vector3(1, 7, 1));
+
+                poste.vertices.push(new THREE.Vector3(8, 7, 0));
+                poste.vertices.push(new THREE.Vector3(10, 7, 1));
+                poste.vertices.push(new THREE.Vector3(8, 6, 0));
+                poste.vertices.push(new THREE.Vector3(10, 6, 1));
+
+                poste.vertices.push(new THREE.Vector3(0, 6, 0));
+                poste.vertices.push(new THREE.Vector3(0, 6, 1));
+
+                poste.faces.push(new THREE.Face3(0, 1, 2));
+                poste.faces.push(new THREE.Face3(2, 1, 3)); 
+
+                poste.faces.push(new THREE.Face3(4, 5, 6));
+                poste.faces.push(new THREE.Face3(6, 5, 7));
+
+                poste.faces.push(new THREE.Face3(2, 6, 7));
+                poste.faces.push(new THREE.Face3(2, 3, 7));
+
+                poste.faces.push(new THREE.Face3(0, 5, 4));
+                poste.faces.push(new THREE.Face3(0, 5, 1));
+
+                poste.faces.push(new THREE.Face3(0, 6, 4));
+                poste.faces.push(new THREE.Face3(0, 6, 2));
+
+                poste.faces.push(new THREE.Face3(5, 7, 1));
+                poste.faces.push(new THREE.Face3(1, 7, 3));
+                
+                poste.faces.push(new THREE.Face3(4, 6, 8));
+                poste.faces.push(new THREE.Face3(6, 8, 9));
+
+                poste.faces.push(new THREE.Face3(12, 10, 13));
+                poste.faces.push(new THREE.Face3(13, 10, 11));
+
+                poste.faces.push(new THREE.Face3(6, 9, 13));
+                poste.faces.push(new THREE.Face3(13, 9, 11));
+
+                poste.faces.push(new THREE.Face3(12, 8, 4));
+                poste.faces.push(new THREE.Face3(12, 8, 10));    
+
+                poste.computeFaceNormals();
+
+                var posteMesh = new THREE.Mesh(poste, materialCuadrosAzules);
+                return posteMesh;        
+            }
+
             function crearConstruccion()
             {
                 var cancha = new THREE.Object3D();
@@ -1560,6 +1618,26 @@
                 poste1 = hacerPostes();
                 poste1.position.set(-18, 12, 34.75);
                 estadio.add(poste1);
+
+                porteria = hacerPorteria();
+                porteria.rotation.y += 90*(Math.PI/180);
+                porteria.position.set(13, -3, 5);
+                estadio.add(porteria);
+
+                porteria = hacerPorteria();
+                porteria.rotation.y += 90*(Math.PI/180);
+                porteria.position.set(-13, -3, 5);
+                estadio.add(porteria);
+
+                porteria = hacerPorteria();
+                porteria.rotation.y += 270*(Math.PI/180);
+                porteria.position.set(14, -3, -6);
+                estadio.add(porteria);
+
+                porteria = hacerPorteria();
+                porteria.rotation.y += 270*(Math.PI/180);
+                porteria.position.set(-12, -3, -5);
+                estadio.add(porteria);
 
                 //------------------------Afuera-------------------------------------------------------------------------
 

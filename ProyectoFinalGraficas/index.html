@@ -94,8 +94,8 @@
                         var angulo = gllanta1Container.rotation.y;
                         gcocheContainer.rotation.y += angulo;
                         angulo = gcocheContainer.rotation.y;
-                        gcocheContainer.position.x += Math.cos(angulo)*3;
-                        gcocheContainer.position.z -= Math.sin(angulo)*3;
+                        gcocheContainer.position.x += Math.cos(angulo)*2;
+                        gcocheContainer.position.z -= Math.sin(angulo)*2;
                         gllantasAtrasContainer.rotation.z += 0.1;
                         gllanta1Container.rotation.z += 0.1;
                         gllanta2Container.rotation.z += 0.1;
@@ -126,8 +126,8 @@
                         var angulo = gllanta1Container.rotation.y;
                         gcocheContainer.rotation.y += angulo;
                         angulo = gcocheContainer.rotation.y;
-                        gcocheContainer.position.x += Math.cos(angulo)*-3;
-                        gcocheContainer.position.z -= Math.sin(angulo)*-3;
+                        gcocheContainer.position.x += Math.cos(angulo)*-2;
+                        gcocheContainer.position.z -= Math.sin(angulo)*-2;
                         gllantasAtrasContainer.rotation.z += 0.1;
                         gllanta1Container.rotation.z += 0.1;
                         gllanta2Container.rotation.z += 0.1;
@@ -1069,6 +1069,7 @@
             var pointLight = new THREE.PointLight( 0xFFFFFF );
             var pointLight2 = new THREE.PointLight( 0xFFFFFF );
 
+
             // set its position
             pointLight.position.x = 10;
             pointLight.position.y = 50;
@@ -1084,7 +1085,8 @@
 
             // add to the scene
             scene.add(pointLight2);
-            
+
+
             // set the background color
             renderer.setClearColor(0X000000, 1);
 
@@ -1490,39 +1492,77 @@
                 patas.position.set(0, 0, -15);
                 scene.add(rueda);
 
-                //Tazas Locas
-                tazasLocas = hacerTazasLocas();
-                tazasLocas.position.set(30, -13, -15);
-                scene.add(tazasLocas);
-
-                gcaballitosContainer.position.set(-25, -16, -15);
-                gcaballitosContainer.scale.set(.3, .3, .3);
-                centro.scale.set(.3, .3, .3);
-                centro.position.set(-25, -10, -15);
-
-                gcocheContainer.scale.set(0.2, 0.2, 0.2);
-                gcocheContainer.position.set(0, -10, 10);
-
-                estadio = crearConstruccion(); 
-
                 renderer.shadowMapEnabled = true;
-                renderer.shadowMapType = THREE.PCFSoftShadowMap;                        
-                pointLight.castShadow = true;
-                pointLight.shadowDarkness = 0.8;
-                pointLight.shadowMapWidth = 5;
-                pointLight.shadowMapHeight = 5;                        
+                renderer.shadowMapType = THREE.PCFSoftShadowMap;   
+
+                var pointLight3 = new THREE.PointLight( 0xFFFFFF );
+
+                pointLight3.position.x = 0;
+                pointLight3.position.y = 50;
+                pointLight3.position.z = 40;
+
+                scene.add(pointLight3);     
+
+                pointLight3.castShadow = true;
+                pointLight3.shadowDarkness = 0.5;
+                pointLight3.shadowMapWidth = 1024;
+                pointLight3.shadowMapHeight = 1024;                        
                 
                 rueda.traverse( function( node ) {
                 if( node.material ) {
                     node.castShadow = true;
                     node.receiveShadow = false;
                 }
-                });                        
+                });
+
                 suelo.traverse( function( node ) {
-                    if( node.material ) {
-                        node.castShadow = false;
-                        node.receiveShadow = true;
-                    }
+                if( node.material ) {
+                    node.castShadow = false;
+                    node.receiveShadow = true;
+                }
+                });
+
+                //Tazas Locas
+                tazasLocas = hacerTazasLocas();
+                tazasLocas.position.set(30, -13, -15);
+                scene.add(tazasLocas);
+
+                tazasLocas.traverse( function( node ) {
+                if( node.material ) {
+                    node.castShadow = true;
+                    node.receiveShadow = false;
+                }
+                });
+
+                gcaballitosContainer.position.set(-25, -16, -15);
+                gcaballitosContainer.scale.set(.3, .3, .3);
+                centro.scale.set(.3, .3, .3);
+                centro.position.set(-25, -10, -15);
+
+                gcaballitosContainer.traverse( function( node ) {
+                if( node.material ) {
+                    node.castShadow = true;
+                    node.receiveShadow = false;
+                }
+                });
+
+                gcocheContainer.scale.set(0.2, 0.2, 0.2);
+                gcocheContainer.position.set(0, -10, 10);
+
+                gcocheContainer.traverse( function( node ) {
+                if( node.material ) {
+                    node.castShadow = true;
+                    node.receiveShadow = false;
+                }
+                });
+
+                estadio = crearConstruccion();                      
+
+                suelo.traverse( function( node ) {
+                if( node.material ) {
+                    node.castShadow = false;
+                    node.receiveShadow = true;
+                }
                 });
 
                 var render = function () { 
